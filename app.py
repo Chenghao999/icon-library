@@ -1,6 +1,6 @@
 # 简化版本的图标管理器
 # 确保基本功能可用，减少依赖要求
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, session, make_response, send_file
 import os
 import json
 from datetime import datetime
@@ -26,6 +26,45 @@ try:
 except ImportError:
     sqlalchemy_available = False
 
+# 从环境变量获取管理员账号和密码
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD')
+
+# 如果环境变量未设置，使用默认值并记录警告
+if not ADMIN_USERNAME:
+    print('警告: ADMIN_USERNAME 环境变量未设置，使用默认值')
+    ADMIN_USERNAME = 'admin'
+if not ADMIN_PASSWORD:
+    print('警告: ADMIN_PASSWORD 环境变量未设置，使用默认值')
+    ADMIN_PASSWORD = 'password123'
+
+# 用户认证相关函数
+def is_authenticated():
+    """检查用户是否已认证"""
+    return session.get('authenticated') and session.get('username') == ADMIN_USERNAME
+
+def login_user():
+    """用户登录"""
+    session['authenticated'] = True
+    session['username'] = ADMIN_USERNAME
+
+def logout_user():
+    """用户登出"""
+    session.pop('authenticated', None)
+    session.pop('username', None)
+
+def login_required(f):
+    """登录装饰器，用于保护需要认证的路由"""
+    def decorated_function(*args, **kwargs):
+        if not is_authenticated():
+            return jsonify({'success': False, 'message': '请先登录'}), 401
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
+
+# 注意：登录相关路由将在app实例创建后定义
+
 # 简化的secure_filename实现
 def simple_secure_filename(filename):
     """简化版的文件名安全处理"""
@@ -35,8 +74,47 @@ def simple_secure_filename(filename):
 
 # 创建Flask应用
 app = Flask(__name__)
+
+# 登录相关路由
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """处理用户登录请求"""
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # 验证用户名和密码
+        if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
+            login_user()
+            # 登录成功后重定向到首页
+            return redirect(url_for('index'))
+        else:
+            # 登录失败，显示错误信息
+            return render_template('login.html', error='用户名或密码错误')
+    
+    # GET 请求，显示登录页面
+    return render_template('login.html')
+
+
+@app.route('/logout')
+def logout():
+    """处理用户登出请求"""
+    logout_user()
+    # 登出后重定向到首页
+    return redirect(url_for('index'))
+
+
+@app.route('/api/auth/status')
+def auth_status():
+    """检查用户认证状态的API端点"""
+    return jsonify({
+        'authenticated': is_authenticated(),
+        'username': session.get('username') if is_authenticated() else None
+    })
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey123')
 app.config['ICON_STORAGE_PATH'] = os.getenv('ICON_STORAGE_PATH', 'static/icons')
+app.config['SESSION_TYPE'] = 'filesystem'  # 使用文件系统存储会话
+app.config['SESSION_PERMANENT'] = True  # 会话持久化
 
 # 确保图标存储目录存在
 if not os.path.exists(app.config['ICON_STORAGE_PATH']):
@@ -74,8 +152,9 @@ class SimpleIcon:
     
     @property
     def url(self):
-        # 获取图标URL路径，用于复制，包含分类路径
-        return url_for('serve_icon', filename=os.path.join(self.category_name, self.filename), _external=True)
+        # 生成图标URL路径，包含分类路径
+        # 使用url_for生成相对路径，而不是绝对URL
+        return url_for('serve_icon', filename=os.path.join(self.category_name, self.filename))
 
 # 根据是否有SQLAlchemy选择不同的数据存储方式
 if sqlalchemy_available:
@@ -115,9 +194,10 @@ if sqlalchemy_available:
             
             @property
             def url(self):
-                # 获取图标URL路径，用于复制，包含分类路径
+                # 生成图标URL路径，包含分类路径
+                # 使用url_for生成相对路径，而不是绝对URL
                 category_folder = '未分类' if not self.category else self.category.name
-                return url_for('serve_icon', filename=os.path.join(category_folder, self.filename), _external=True)
+                return url_for('serve_icon', filename=os.path.join(category_folder, self.filename))
             
             @property
             def category_name(self):
@@ -356,6 +436,7 @@ def index():
     return render_template('index.html', categories=categories, icons=icons)
 
 @app.route('/upload', methods=['POST'])
+@login_required
 def upload_icon():
     # 检查是否有文件上传
     if 'icon' not in request.files:
@@ -436,37 +517,50 @@ def upload_icon():
 
 @app.route('/icons/<path:filename>')
 def serve_icon(filename):
+    """支持分类目录的图标服务函数"""
     try:
-        # 确保路径安全，防止路径遍历攻击
-        safe_path = sanitize_path(filename)
+        # 强制使用绝对路径
+        storage_dir = os.path.abspath(app.config['ICON_STORAGE_PATH'])
         
-        # 额外的安全检查，确保请求的文件在图标存储目录内
-        requested_path = os.path.normpath(os.path.join(app.config['ICON_STORAGE_PATH'], safe_path))
-        storage_path = os.path.normpath(app.config['ICON_STORAGE_PATH'])
+        # 修复Windows路径分隔符问题
+        filename = filename.replace('\\', '/')
         
-        # 确保请求的文件确实在存储目录内
-        if not requested_path.startswith(storage_path):
-            flash('访问被拒绝: 无效的文件路径')
-            return redirect(url_for('index'))
+        # 构建完整文件路径，支持分类目录
+        file_path = os.path.join(storage_dir, filename.replace('/', os.path.sep))
         
-        # 确保文件存在
-        if not os.path.exists(requested_path):
-            flash('文件不存在')
-            return redirect(url_for('index'))
+        # 安全检查：确保文件在存储目录内
+        if not os.path.abspath(file_path).startswith(storage_dir + os.path.sep):
+            return jsonify({'error': '无效的文件路径'}), 400
         
-        # 提取目录和文件名，使用send_from_directory的正确参数
-        directory, file_name = os.path.split(requested_path)
-        parent_dir, subdir = os.path.split(directory)
-        
-        # 如果有子目录（分类），则使用子目录作为path参数
-        if subdir and parent_dir == storage_path:
-            return send_from_directory(directory, file_name)
+        # 检查文件是否存在且可读
+        if os.path.isfile(file_path) and os.access(file_path, os.R_OK):
+            # 读取文件内容并直接返回
+            with open(file_path, 'rb') as f:
+                content = f.read()
+            
+            # 创建响应对象
+            response = make_response(content)
+            
+            # 根据文件扩展名设置MIME类型
+            ext = os.path.splitext(file_path)[1].lower()
+            if ext in ['.png']:
+                response.headers['Content-Type'] = 'image/png'
+            elif ext in ['.jpg', '.jpeg']:
+                response.headers['Content-Type'] = 'image/jpeg'
+            elif ext in ['.svg']:
+                response.headers['Content-Type'] = 'image/svg+xml'
+            elif ext in ['.gif']:
+                response.headers['Content-Type'] = 'image/gif'
+            else:
+                response.headers['Content-Type'] = 'application/octet-stream'
+            
+            return response
         else:
-            return send_from_directory(storage_path, safe_path)
-    except Exception as e:
-        print(f"提供图标文件时出错: {e}")
-        flash('文件访问出错')
-        return redirect(url_for('index'))
+            # 文件不存在或不可读
+            return jsonify({'error': '文件不存在'}), 404
+    except:
+        # 捕获所有异常，返回404
+        return jsonify({'error': '文件不存在'}), 404
 
 # 文件系统存储函数
 def update_file_icon_name(icon_id, new_name):
@@ -497,6 +591,7 @@ def update_file_icon_name(icon_id, new_name):
     return False
 
 @app.route('/rename/<int:icon_id>', methods=['POST'])
+@login_required
 def rename_icon(icon_id):
     new_name = request.form.get('new_name', '').strip()
     
@@ -545,51 +640,40 @@ def rename_icon(icon_id):
 @app.route('/copy-url/<int:icon_id>')
 def copy_icon_url(icon_id):
     try:
-        # 构建完整URL
-        base_url = request.host_url.rstrip('/')
-        category_name = '未分类'
-        filename = None
-        
-        # 根据存储方式获取图标信息
+        # 兼容两种存储方式获取图标
+        icon = None
         if sqlalchemy_available:
             try:
                 icon = Icon.query.get(icon_id)
-                if not icon:
-                    return jsonify({'success': False, 'message': '图标不存在'})
-                category_name = '未分类' if not icon.category else icon.category.name
-                filename = icon.filename
             except Exception as e:
-                print(f"数据库查询失败: {e}")
-                # 尝试从文件系统获取
-                icons = get_file_icons()
-                for i in icons:
-                    if i.id == icon_id:
-                        category_name = i.category_name
-                        filename = i.filename
-                        break
-        else:
-            # 使用文件系统存储
+                print(f"从数据库获取图标失败: {e}")
+                
+        if not icon:
+            # 从文件系统存储中获取图标
             icons = get_file_icons()
             for i in icons:
                 if i.id == icon_id:
-                    category_name = i.category_name
-                    filename = i.filename
+                    icon = i
                     break
         
-        if not filename:
+        if not icon:
             return jsonify({'success': False, 'message': '图标不存在'})
         
-        # 构建图标URL，对中文分类名称进行URL编码
-        encoded_category = quote(category_name)
-        icon_url = f'{base_url}/icons/{encoded_category}/{filename}'
-        
-        # 返回URL，让前端处理复制操作
-        return jsonify({'success': True, 'url': icon_url})
+        # 返回图标URL，使用url_for生成完整URL用于复制
+        # 构建完整的分类+文件名路径
+        if hasattr(icon, 'category_name'):
+            category_folder = icon.category_name
+        else:
+            category_folder = '未分类' if not icon.category else icon.category.name
+            
+        full_url = url_for('serve_icon', filename=os.path.join(category_folder, icon.filename), _external=True)
+        return jsonify({'success': True, 'url': full_url})
     except Exception as e:
-        print(f"复制URL时出错: {e}")
-        return jsonify({'success': False, 'message': f'获取URL失败: {str(e)}'})
+        print(f"复制图标URL失败: {e}")
+        return jsonify({'success': False, 'message': '服务器错误'})
 
 @app.route('/add-category', methods=['POST'])
+@login_required
 def add_category():
     try:
         category_name = request.form.get('category_name', '').strip()
@@ -647,6 +731,7 @@ def add_category():
         return jsonify({'success': False, 'message': f'分类创建失败: {str(e)}'})
 
 @app.route('/update-category', methods=['POST'])
+@login_required
 def update_category():
     """更新分类信息"""
     try:
@@ -851,6 +936,7 @@ def delete_category(category_id):
         return jsonify({'success': False, 'message': f'删除失败: {str(e)}'})
 
 @app.route('/update-category/<int:icon_id>', methods=['POST'])
+@login_required
 def update_icon_category(icon_id):
     try:
         # 获取图标信息
@@ -985,6 +1071,7 @@ def update_icon_category(icon_id):
         return jsonify({'success': False, 'message': f'分类更新失败: {str(e)}'})
 
 @app.route('/delete/<int:icon_id>', methods=['POST'])
+@login_required
 def delete_icon(icon_id):
     try:
         icon = None
@@ -1046,6 +1133,7 @@ def delete_icon(icon_id):
         return jsonify({'success': False, 'message': f'删除失败: {str(e)}'})
 
 @app.route('/batch-upload', methods=['POST'])
+@login_required
 def batch_upload_icons():
     if 'icons' not in request.files:
         return jsonify({'success': False, 'message': '没有文件被上传'})

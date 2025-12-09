@@ -16,4 +16,6 @@ services:
       - DATABASE_URL=sqlite:////app/data/icons.db
       - FLASK_ENV=production
       - GUNICORN_CMD_ARGS="--timeout 120 --workers 4"
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password123
     user: "1000:1000"

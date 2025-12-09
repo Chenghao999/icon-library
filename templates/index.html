@@ -5,6 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>高质量图标库 - 适用于个人仪表板</title>
     <style>
+        .auth-buttons {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .auth-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+        
+        .login-button {
+            background-color: #4a90e2;
+            color: white;
+        }
+        
+        .login-button:hover {
+            background-color: #3a80d2;
+        }
+        
+        .logout-button {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .logout-button:hover {
+            background-color: #d32f2f;
+        }
+        
+        .login-required {
+            display: none;
+        }
+        
+        .login-required.show {
+            display: block;
+        }
+        
+        .editor-note {
+            background-color: #f1f8ff;
+            border-left: 4px solid #4a90e2;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 0 4px 4px 0;
+            font-size: 14px;
+            color: #1a73e8;
+        }
+    </style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -120,6 +176,16 @@
             font-weight: 500;
         }
         
+        .login-required-note {
+            color: #757575;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+            padding: 8px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+        }
+        
         .manage-icon {
             background-color: #e53935;
             color: white;
@@ -131,6 +197,16 @@
             justify-content: center;
             font-size: 16px;
             line-height: 1;
+        }
+        
+        .editor-note {
+            background-color: #f0f7ff;
+            border-left: 3px solid #2196f3;
+            padding: 8px 12px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #1976d2;
+            border-radius: 0 3px 3px 0;
         }
         
         .content {
@@ -991,7 +1067,6 @@
         } catch (error) {
             console.error('DOMContentLoaded事件绑定失败:', error);
         }
-    }
     </script>
 <!-- 文件上传验证和添加分类按钮事件绑定 -->
         <script type="text/javascript">
@@ -1010,25 +1085,105 @@
             }
         }
         
-            // 直接使用简单的DOM操作
-            setTimeout(function() {
-                try {
-                    var addButton = document.getElementById('add-category-button');
-                    if (addButton) {
-                        console.log('找到添加分类按钮，设置点击事件');
-                        addButton.onclick = function() {
-                            var input = document.getElementById('new-category-name');
-                            if (input && input.value.trim()) {
-                                addCategory();
-                            } else {
-                                alert('请输入分类名称');
-                            }
-                        };
+        // 认证相关函数
+        function checkAuthStatus() {
+            try {
+                // 发送请求检查登录状态
+                fetch('/api/auth/status')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateUIForAuthStatus(data.authenticated);
+                    })
+                    .catch(error => {
+                        console.error('检查认证状态失败:', error);
+                        updateUIForAuthStatus(false);
+                    });
+            } catch (error) {
+                console.error('检查认证状态时发生错误:', error);
+            }
+        }
+        
+        // 根据认证状态更新UI
+        function updateUIForAuthStatus(isAuthenticated) {
+            try {
+                const loginButton = document.getElementById('login-button');
+                const logoutButton = document.getElementById('logout-button');
+                const loginRequiredElements = document.querySelectorAll('.login-required');
+                
+                // 更新按钮显示
+                if (loginButton) loginButton.style.display = isAuthenticated ? 'none' : 'inline-block';
+                if (logoutButton) logoutButton.style.display = isAuthenticated ? 'inline-block' : 'none';
+                
+                // 更新需要登录的元素
+                loginRequiredElements.forEach(element => {
+                    if (isAuthenticated) {
+                        element.classList.add('show');
+                    } else {
+                        element.classList.remove('show');
                     }
-                } catch (e) {
-                    console.log('简单脚本执行错误:', e);
+                });
+            } catch (error) {
+                console.error('更新认证UI状态失败:', error);
+            }
+        }
+        
+        // 登出函数
+        function logout() {
+            try {
+                window.location.href = '/logout';
+            } catch (error) {
+                console.error('登出函数执行错误:', error);
+            }
+        }
+        
+        // 登录函数
+        function login() {
+            try {
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('登录函数执行错误:', error);
+            }
+        }
+        
+        // 页面加载完成后执行初始化
+        window.onload = function() {
+            try {
+                // 检查认证状态
+                checkAuthStatus();
+                
+                // 添加分类按钮事件
+                var addButton = document.getElementById('add-category-button');
+                if (addButton) {
+                    console.log('找到添加分类按钮，设置点击事件');
+                    addButton.onclick = function() {
+                        var input = document.getElementById('new-category-name');
+                        if (input && input.value.trim()) {
+                            addCategory();
+                        } else {
+                            alert('请输入分类名称');
+                        }
+                    };
                 }
-            }, 100); // 确保DOM已加载
+                
+                // 登录/登出按钮事件
+                var loginBtn = document.getElementById('login-button');
+                var logoutBtn = document.getElementById('logout-button');
+                if (loginBtn) {
+                    loginBtn.onclick = login;
+                }
+                if (logoutBtn) {
+                    logoutBtn.onclick = logout;
+                }
+            } catch (e) {
+                console.log('脚本初始化执行错误:', e);
+            }
+        };
         </script>
+            
+            <!-- 认证按钮容器 -->
+            <div class="auth-buttons">
+                <button id="login-button" class="auth-button login-button">登录</button>
+                <button id="logout-button" class="auth-button logout-button" style="display: none;">登出</button>
+            </div>
       </body>
 </html>
