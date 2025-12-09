@@ -478,7 +478,7 @@
             
             <div class="upload-section">
                 <h3>上传图标</h3>
-                <form action="/upload" method="post" enctype="multipart/form-data">
+                <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="return validateFileSelection()">
                     <input type="file" id="icon" name="icon" accept=".png,.jpg,.jpeg,.gif,.svg,.ico,.webp" multiple>
                     <select id="category_id" name="category_id">
                         {% for category in categories %}
@@ -991,9 +991,25 @@
         } catch (error) {
             console.error('DOMContentLoaded事件绑定失败:', error);
         }
+    }
     </script>
-<!-- 简单的添加分类按钮事件绑定 - 确保功能可用 -->
+<!-- 文件上传验证和添加分类按钮事件绑定 -->
         <script type="text/javascript">
+        // 文件上传验证函数
+        function validateFileSelection() {
+            try {
+                const fileInput = document.getElementById('icon');
+                if (fileInput && fileInput.files.length === 0) {
+                    alert('请先选择要上传的图标文件！');
+                    return false; // 阻止表单提交
+                }
+                return true; // 允许表单提交
+            } catch (error) {
+                console.error('验证文件选择时出错:', error);
+                return false;
+            }
+        }
+        
             // 直接使用简单的DOM操作
             setTimeout(function() {
                 try {
