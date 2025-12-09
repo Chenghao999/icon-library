@@ -11,6 +11,149 @@
             box-sizing: border-box;
         }
         
+        .main-container {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .sidebar h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #2196f3;
+        }
+        
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+        
+        .search-btn:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .sidebar-category-list {
+            list-style: none;
+        }
+        
+        .sidebar-category-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #555;
+        }
+        
+        .sidebar-category-item:hover,
+        .sidebar-category-item.active {
+            background-color: #e3f2fd;
+            color: #2196f3;
+            font-weight: 500;
+        }
+        
+        .sidebar-divider {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 20px 0;
+        }
+        
+        .sidebar-management-list {
+            list-style: none;
+        }
+        
+        .sidebar-management-item {
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sidebar-management-item:hover {
+            background-color: #ffebee;
+            color: #e53935;
+            font-weight: 500;
+        }
+        
+        .manage-icon {
+            background-color: #e53935;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1;
+        }
+        
+        .content {
+            flex: 1;
+        }
+        
+        .category-section {
+            margin-bottom: 30px;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .category-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
@@ -301,6 +444,34 @@
     {% endwith %}
     
     <div class="container">
+        <div class="main-container">
+            <!-- 左侧分类边栏 -->
+            <div class="sidebar">
+                <h3>搜索图标</h3>
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="搜索图标...">
+                    <button class="search-btn" id="search-btn">🔍</button>
+                </div>
+                
+                <h3>分类筛选</h3>
+                <ul class="sidebar-category-list">
+                    <li class="sidebar-category-item active" data-category="all">全部图标</li>
+                    {% for category in categories %}
+                        <li class="sidebar-category-item" data-category="{{ category.id }}">{{ category.name }}</li>
+                    {% endfor %}
+                </ul>
+                
+                {% if session.get('is_admin') %}
+                <div class="sidebar-divider"></div>
+                <h3>管理功能</h3>
+                <ul class="sidebar-management-list">
+                    <li class="sidebar-management-item" id="addCategoryBtn" onclick="document.getElementById('new-category-name').focus();">
+                        <span class="manage-icon">+</span> 添加分类
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+            <div class="content">
         <!-- 管理面板 - 仅管理员可见 -->
         <div class="admin-panel">
             <h2>管理面板</h2>
@@ -322,7 +493,7 @@
                 <h3>分类管理</h3>
                 <div class="category-management">
                     <input type="text" id="new-category-name" placeholder="输入新分类名称" class="category-input">
-                    <button class="add-btn" onclick="addCategory()">添加分类</button>
+                    <button id="add-category-button" class="add-btn">添加分类</button>
                 </div>
                 
                 <ul class="category-list">
@@ -339,25 +510,43 @@
             </div>
         </div>
         
-        <!-- 图标展示区域 -->
-        <div class="icons-grid">
-            {% if icons %}
-                {% for icon in icons %}
-                    <div class="icon-card" onclick="downloadIcon('{{ icon.url }}', '{{ icon.original_filename }}')">
-                        <img src="{{ icon.url }}" alt="{{ icon.original_filename }}">
-                        <div class="icon-name">{{ icon.original_filename }}</div>
-                        <div class="icon-actions">
-                            <button class="action-btn download-btn" onclick="event.stopPropagation(); downloadIcon('{{ icon.url }}', '{{ icon.original_filename }}')">下载</button>
-                            <button class="action-btn edit-btn" onclick="event.stopPropagation(); copyIconUrl({{ icon.id }})">复制链接</button>
-                        </div>
+        <!-- 图标展示区域 - 按分类分组 -->
+        {% if icons %}
+            {% set icons_by_category = {} %}
+            {% for icon in icons %}
+                {% if not icon.category_name %}
+                    {% set _ = icon.__setattr__('category_name', '未分类') %}
+                {% endif %}
+                {% if icon.category_name not in icons_by_category %}
+                    {% set _ = icons_by_category.__setitem__(icon.category_name, []) %}
+                {% endif %}
+                {% set _ = icons_by_category[icon.category_name].append(icon) %}
+            {% endfor %}
+            
+            {% for category_name, category_icons in icons_by_category.items() %}
+                <div class="category-section"
+                      data-category-section="{{ category_name | lower | replace(' ', '-') }}">
+                    <div class="category-section-title">{{ category_name }}</div>
+                    <div class="icons-grid">
+                        {% for icon in category_icons %}
+                            <div class="icon-card" onclick="copyIconUrl({{ icon.id }})">
+                                <img src="{{ icon.url }}" alt="{{ icon.original_filename }}">
+                                <div class="icon-name">{{ icon.original_filename }}</div>
+                                <div class="icon-actions">
+                                    <button class="action-btn edit-btn" onclick="event.stopPropagation(); copyIconUrl({{ icon.id }})">复制链接</button>
+                                    <button class="action-btn download-btn" onclick="event.stopPropagation(); downloadIcon('{{ icon.url }}', '{{ icon.original_filename }}')">下载</button>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <h3>暂无图标</h3>
-                    <p>请使用上方上传功能添加图标</p>
                 </div>
-            {% endif %}
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <h3>暂无图标</h3>
+                <p>请使用上方上传功能添加图标</p>
+            </div>
+        {% endif %}
         </div>
     </div>
     
@@ -366,6 +555,12 @@
     </footer>
     
     <script>
+        // 全局错误处理
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.error('JavaScript全局错误:', message, '行:', lineno, '列:', colno);
+            return true; // 阻止默认事件处理
+        };
+        
         // 下载图标功能
         function downloadIcon(url, filename) {
             // 创建一个临时链接来下载图片
@@ -404,56 +599,102 @@
                 });
         }
         
-        // 添加分类功能
-        function addCategory() {
-            const categoryName = document.getElementById('new-category-name').value.trim();
-            if (!categoryName) {
-                showNotification('请输入分类名称', 'warning');
-                return;
+        // 添加分类按钮事件 - 修复版本
+        try {
+            // 使用正确的ID选择器
+            const addCategoryButton = document.getElementById('add-category-button');
+            if (addCategoryButton) {
+                addCategoryButton.onclick = function() {
+                    addCategory();
+                };
+                console.log('添加分类按钮事件绑定成功');
+            } else {
+                console.log('未找到添加分类按钮元素');
             }
-            
-            fetch('/add-category', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'category_name': categoryName
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // 添加新分类到列表
-                    const categoryList = document.querySelector('.category-list');
-                    const newCategoryItem = document.createElement('li');
-                    newCategoryItem.className = 'category-item';
-                    newCategoryItem.innerHTML = `
-                        <span class="category-name" id="category-name-${data.id}">${data.name}</span>
-                        <button class="action-btn edit-btn" onclick="editCategory(${data.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor"/></svg></button>
-                        <button class="action-btn delete-btn" onclick="deleteCategory(${data.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/></svg></button>
-                    `;
-                    categoryList.appendChild(newCategoryItem);
-                    
-                    // 更新下拉菜单中的分类
-                    const categorySelect = document.querySelector('select[name="category_id"]');
-                    const newOption = document.createElement('option');
-                    newOption.value = data.id;
-                    newOption.textContent = data.name;
-                    categorySelect.appendChild(newOption);
-                    
-                    // 清空输入框
-                    document.getElementById('new-category-name').value = '';
-                    
-                    showNotification('分类添加成功');
-                } else {
-                    showNotification(data.message || '添加分类失败', 'error');
+        } catch (error) {
+            console.error('添加分类按钮事件绑定失败:', error);
+        }
+        
+        // 添加分类功能 - 增强错误处理版本
+        function addCategory() {
+            try {
+                const categoryNameInput = document.getElementById('new-category-name');
+                if (!categoryNameInput) {
+                    console.error('未找到分类名称输入框');
+                    showNotification('系统错误：未找到必要元素', 'error');
+                    return;
                 }
-            })
-            .catch(error => {
-                console.error('添加分类出错:', error);
-                showNotification('添加分类时出错', 'error');
-            });
+                
+                const categoryName = categoryNameInput.value.trim();
+                if (!categoryName) {
+                    showNotification('请输入分类名称', 'warning');
+                    return;
+                }
+                
+                console.log('开始添加分类:', categoryName);
+                
+                // 调用后端添加分类API
+                fetch('/add-category', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        'category_name': categoryName
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP错误状态: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        console.log('分类添加成功:', data);
+                        
+                        // 添加新分类到列表
+                        const categoryList = document.querySelector('.category-list');
+                        if (categoryList) {
+                            const newCategoryItem = document.createElement('li');
+                            newCategoryItem.className = 'category-item';
+                            newCategoryItem.innerHTML = `
+                                <span class="category-name" id="category-name-${data.id}">${data.name}</span>
+                                <button class="action-btn edit-btn" onclick="editCategory(${data.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor"/></svg></button>
+                                <button class="action-btn delete-btn" onclick="deleteCategory(${data.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="currentColor"/></svg></button>
+                            `;
+                            categoryList.appendChild(newCategoryItem);
+                        } else {
+                            console.warn('未找到分类列表元素');
+                        }
+                        
+                        // 更新下拉菜单中的分类
+                        const categorySelect = document.querySelector('select[name="category_id"]');
+                        if (categorySelect) {
+                            const newOption = document.createElement('option');
+                            newOption.value = data.id;
+                            newOption.textContent = data.name;
+                            categorySelect.appendChild(newOption);
+                        } else {
+                            console.warn('未找到分类下拉选择框');
+                        }
+                        
+                        // 清空输入框
+                        categoryNameInput.value = '';
+                        
+                        showNotification('分类添加成功');
+                    } else {
+                        showNotification(data.message || '添加分类失败', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('添加分类出错:', error);
+                    showNotification('添加分类时出错', 'error');
+                });
+            } catch (error) {
+                console.error('addCategory函数执行出错:', error);
+                showNotification('添加分类功能出错', 'error');
+            }
         }
         
         // 编辑分类功能
@@ -631,6 +872,147 @@
                 }, 300);
             }, 3000);
         }
+        
+        // 搜索功能
+        try {
+            const searchBtn = document.getElementById('search-btn');
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    const searchInput = document.getElementById('search-input');
+                    if (searchInput) {
+                        const searchTerm = searchInput.value.trim().toLowerCase();
+                        if (searchTerm) {
+                            searchIcons(searchTerm);
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('搜索按钮事件绑定失败:', error);
+        }
+        
+        // 回车搜索
+        try {
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const searchTerm = this.value.trim().toLowerCase();
+                        if (searchTerm) {
+                            searchIcons(searchTerm);
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('搜索输入框事件绑定失败:', error);
+        }
+        
+        // 搜索图标函数
+        function searchIcons(term) {
+            const categorySections = document.querySelectorAll('.category-section');
+            let found = false;
+            
+            categorySections.forEach(section => {
+                const icons = section.querySelectorAll('.icon-card');
+                let sectionVisible = false;
+                
+                icons.forEach(icon => {
+                    const iconName = icon.querySelector('.icon-name').textContent.toLowerCase();
+                    const categoryName = section.querySelector('.category-section-title').textContent.toLowerCase();
+                    
+                    if (iconName.includes(term) || categoryName.includes(term)) {
+                        icon.style.display = 'block';
+                        sectionVisible = true;
+                        found = true;
+                    } else {
+                        icon.style.display = 'none';
+                    }
+                });
+                
+                // 显示或隐藏整个分类区块
+                section.style.display = sectionVisible ? 'block' : 'none';
+            });
+            
+            // 如果没有找到结果
+            if (!found) {
+                showNotification('未找到匹配的图标', 'warning');
+            } else {
+                showNotification(`搜索结果: "${term}"`);
+            }
+        }
+        
+        // 分类筛选功能
+        try {
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    const categoryItems = document.querySelectorAll('.sidebar-category-item');
+                    
+                    if (categoryItems.length > 0) {
+                        categoryItems.forEach(item => {
+                            try {
+                                item.addEventListener('click', function() {
+                                    // 移除所有激活状态
+                                    categoryItems.forEach(cat => cat.classList.remove('active'));
+                                    // 添加当前项激活状态
+                                    this.classList.add('active');
+                                    
+                                    const category = this.getAttribute('data-category');
+                                    const categorySections = document.querySelectorAll('.category-section');
+                                    
+                                    if (category === 'all') {
+                                        // 显示所有分类
+                                        categorySections.forEach(section => {
+                                            section.style.display = 'block';
+                                        });
+                                        showNotification('显示所有图标');
+                                    } else {
+                                        // 只显示选中的分类
+                                        const categoryName = this.textContent;
+                                        categorySections.forEach(section => {
+                                            if (section.querySelector('.category-section-title').textContent === categoryName) {
+                                                section.style.display = 'block';
+                                            } else {
+                                                section.style.display = 'none';
+                                            }
+                                        });
+                                        showNotification(`筛选分类: ${categoryName}`);
+                                    }
+                                });
+                            } catch (err) {
+                                console.error('分类项事件绑定失败:', err);
+                            }
+                        });
+                    }
+                } catch (err) {
+                    console.error('DOMContentLoaded事件处理失败:', err);
+                }
+            });
+        } catch (error) {
+            console.error('DOMContentLoaded事件绑定失败:', error);
+        }
     </script>
-</body>
+<!-- 简单的添加分类按钮事件绑定 - 确保功能可用 -->
+        <script type="text/javascript">
+            // 直接使用简单的DOM操作
+            setTimeout(function() {
+                try {
+                    var addButton = document.getElementById('add-category-button');
+                    if (addButton) {
+                        console.log('找到添加分类按钮，设置点击事件');
+                        addButton.onclick = function() {
+                            var input = document.getElementById('new-category-name');
+                            if (input && input.value.trim()) {
+                                addCategory();
+                            } else {
+                                alert('请输入分类名称');
+                            }
+                        };
+                    }
+                } catch (e) {
+                    console.log('简单脚本执行错误:', e);
+                }
+            }, 100); // 确保DOM已加载
+        </script>
+      </body>
 </html>
