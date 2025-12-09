@@ -1,0 +1,22 @@
+{
+  "name": "icon-store-frontend",
+  "version": "0.1.5",
+  "description": "图标库管理系统前端",
+  "main": "index.html",
+  "scripts": {
+    "dev": "http-server -p 3000 -c-1",
+    "build": "copyfiles index.html dist/ && copyfiles -u 2 src/**/* dist/",
+    "start": "npm run build && http-server dist/ -p 3000 -c-1"
+  },
+  "keywords": [
+    "icon",
+    "store",
+    "management"
+  ],
+  "author": "icon-store-team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "copyfiles": "^2.4.1"
+  }
+}

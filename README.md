@@ -1,187 +1,226 @@
-# 图标管理器
+# 图标库管理系统
 
-一个简单易用的图标管理系统，可以帮助您分类管理图标、重命名图标，并提供URL复制功能，方便在导航页中使用。支持Docker和非Docker部署，兼容Windows、Mac和群晖NAS等平台。
+<p align="center">
+  <img src="https://img.shields.io/badge/version-v0.1.5-blue.svg">
+  <img src="https://img.shields.io/badge/license-MIT-green.svg">
+  <img src="https://img.shields.io/badge/technology-Flask%20%2B%20Vanilla%20JS-blue.svg">
+</p>
 
-## 功能特点
+## 项目介绍
 
-- **图标上传**：支持单个和批量上传图标文件
-- **分类管理**：创建自定义分类，灵活管理图标
-- **图标重命名**：方便地修改图标显示名称
-- **URL复制**：一键复制图标URL，直接用于导航页
-- **响应式设计**：适配不同屏幕尺寸
-- **Docker支持**：容器化部署，简单便捷
-- **跨平台兼容**：支持Windows、Mac和群晖NAS等设备
-- **自动后备存储**：在数据库不可用时自动切换到文件系统存储
+图标库管理系统是一个基于前后端分离架构的Web应用，用于管理和分发各种图标资源。系统支持图标上传、分类管理、搜索下载等功能，适用于团队内部图标资源的统一管理。
 
-## 技术栈
+## 系统架构
 
-- **后端**：Python Flask
-- **数据库**：SQLite (可替换为其他数据库)
-- **前端**：HTML, CSS, JavaScript
-- **容器化**：Docker & Docker Compose
+### 前后端分离架构
 
-## 快速开始
+该项目采用现代化的前后端分离架构：
 
-### 方法一：使用Docker运行（推荐）
+- **后端**: 使用 Python Flask 框架构建 RESTful API 服务
+- **前端**: 使用原生 JavaScript、HTML5 和 CSS3 构建单页应用
+- **数据存储**: 支持 SQLite、MySQL、PostgreSQL 等多种数据库
+- **文件存储**: 本地文件系统存储图标资源
 
-1. 确保您已安装Docker和Docker Compose
-
-2. 在项目根目录下执行：
-
-```bash
-docker-compose up -d
-```
-
-3. 打开浏览器访问：http://localhost:5000
-
-### 方法二：非Docker直接运行（Windows专用）
-
-1. 确保已安装Python 3.6+
-2. 双击运行 `run-local.bat` 脚本
-3. 脚本会自动：
-   - 创建必要的目录结构
-   - 安装所需依赖
-   - 设置环境变量
-   - 启动应用程序
-4. 打开浏览器访问 http://localhost:5000
-
-### 方法三：非Docker手动运行（Mac/Linux/群晖NAS）
-
-1. 确保已安装Python 3.6+
-2. 打开终端，进入项目目录
-3. 运行以下命令：
-   ```bash
-   python -m pip install -r requirements.txt --user
-   python app.py
-   ```
-4. 打开浏览器访问 http://localhost:5000
-
-## 手动配置（可选）
-
-如果需要自定义配置，可以在项目根目录创建 `.env` 文件，内容如下：
-
-```
-# 应用密钥（建议修改为随机字符串）
-SECRET_KEY=your_secret_key_here
-
-# 图标存储路径
-ICON_STORAGE_PATH=./static/icons
-
-# 数据库连接字符串（如果使用数据库）
-DATABASE_URL=sqlite:///./icon_store.db
-```
-
-## 使用说明
-
-### 上传图标
-
-1. 在上传区域选择单个或多个图标文件
-2. 选择分类（可选）
-3. 点击上传按钮
-
-### 管理分类
-
-1. 在分类管理区域输入新分类名称
-2. 点击添加分类按钮
-3. 点击分类标签可以筛选显示特定分类的图标
-
-### 重命名图标
-
-1. 找到需要重命名的图标
-2. 点击重命名按钮
-3. 输入新名称并保存
-
-### 复制URL
-
-1. 找到需要使用的图标
-2. 点击复制URL按钮
-3. URL会自动复制到剪贴板，可以直接粘贴到导航页中使用
-
-### 修改图标分类
-
-1. 在图标下方的下拉菜单中选择新分类
-2. 系统会自动保存分类变更，文件会自动移动到相应分类文件夹
-
-## 文件结构
+### 目录结构
 
 ```
 icon_store/
-├── static/
-│   ├── css/           # 样式文件
-│   └── icons/         # 图标存储根目录
-│       ├── 未分类/     # 未分类图标文件夹
-│       └── [分类名称]/ # 按分类创建的文件夹
-├── templates/         # HTML模板
-├── data/              # 数据库文件和文件系统存储数据
-├── app.py             # 主应用程序
-├── requirements.txt   # Python依赖
-├── run-local.bat      # Windows非Docker启动脚本
-├── Dockerfile         # Docker构建文件
-└── docker-compose.yml # Docker Compose配置
+├── backend/               # 后端应用
+│   ├── app/               # 应用主模块
+│   │   ├── api/           # API路由层
+│   │   ├── models/        # 数据模型层
+│   │   ├── services/      # 业务逻辑层
+│   │   ├── utils/         # 工具函数
+│   │   ├── middlewares/   # 中间件
+│   │   ├── config.py      # 配置文件
+│   │   └── __init__.py    # 应用初始化
+│   ├── uploads/           # 上传文件存储目录
+│   ├── app.py             # 应用入口
+│   ├── init_db.py         # 数据库初始化脚本
+│   ├── requirements.txt   # Python依赖
+│   ├── .env               # 环境变量
+│   └── .env.example       # 环境变量示例
+├── frontend/              # 前端应用
+│   ├── public/            # 静态资源
+│   ├── src/               # 源码
+│   │   ├── api/           # API通信模块
+│   │   ├── components/    # 组件
+│   │   ├── styles/        # CSS样式
+│   │   ├── utils/         # 工具函数
+│   │   └── main.js        # 主脚本
+│   ├── index.html         # 入口HTML
+│   └── package.json       # NPM配置
+├── start.bat              # Windows启动脚本
+├── start.sh               # Linux/Mac启动脚本
+└── README.md              # 项目说明文档
 ```
 
-## 系统要求
+### 核心特性
 
-- **Python**: 3.6 或更高版本
-- **磁盘空间**: 取决于您存储的图标数量
-- **权限要求**: 对static/icons目录的读写权限
-- **网络**: 能够访问本地网络(用于Web界面)
+1. **前后端完全分离**
+   - 后端提供 RESTful API 接口
+   - 前端通过 AJAX 调用接口获取数据
+   - 支持跨域资源共享 (CORS)
 
-## 故障排除
+2. **模块化设计**
+   - 后端采用 MVC 架构模式
+   - 分层设计：API层、服务层、数据访问层
+   - 易于扩展和维护
 
-### 常见问题
+3. **功能完整**
+   - 图标上传、预览、下载
+   - 分类管理
+   - 用户认证
+   - 响应式设计
 
-1. **Flask命令不可识别**
-   - 问题: 在运行`flask run`时出现"flask未被识别"错误
-   - 解决方案: 使用`python app.py`直接运行，或使用`run-local.bat`脚本
+## 快速开始
 
-2. **端口占用**
-   - 问题: 5000端口被占用导致无法启动
-   - 解决方案: 在app.py文件中修改`port=5000`为其他端口号
+### 环境要求
 
-3. **权限错误**
-   - 问题: 出现权限相关错误
-   - 解决方案: 确保有对static/icons和data目录的读写权限
+- **Python**: 3.7+
+- **Node.js**: 12.x+
+- **浏览器**: Chrome, Firefox, Safari, Edge 等现代浏览器
 
-4. **依赖安装失败**
-   - 问题: 在Python 3.13+版本上安装依赖失败
-   - 解决方案: 使用`--user`参数安装，或使用更新的依赖版本
+### 一键启动
 
-5. **跨平台使用注意事项**
-   - Windows: 使用`run-local.bat`简化操作
-   - 群晖NAS: 通过SSH终端或Task Scheduler运行，需确保Python环境已安装
-   - Mac: 在终端中执行安装和启动命令
+#### Windows系统
 
-### 日志和错误
+1. 确保已安装 Python 和 Node.js
+2. 双击运行 `start.bat` 脚本
+3. 浏览器访问 http://localhost:3000
 
-应用程序会在控制台输出运行日志和错误信息，可用于排查问题。
+#### Linux/Mac系统
 
-## 安全说明
+1. 确保已安装 Python 和 Node.js
+2. 设置脚本执行权限：`chmod +x start.sh`
+3. 运行脚本：`./start.sh`
+4. 浏览器访问 http://localhost:3000
 
-- 系统包含基本的文件路径验证，防止路径遍历攻击
-- 建议在生产环境中配置适当的访问控制
-- 定期备份图标数据以防止意外丢失
+### 手动安装
+
+#### 后端安装
+
+```bash
+cd backend
+
+# 创建虚拟环境（可选）
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate  # Windows
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 配置环境变量
+cp .env.example .env
+# 编辑 .env 文件，设置数据库连接等参数
+
+# 初始化数据库
+python init_db.py
+
+# 启动后端服务
+python app.py
+```
+
+#### 前端安装
+
+```bash
+cd frontend
+
+# 安装依赖
+npm install
+
+# 开发模式启动
+npm run dev
+
+# 或构建生产版本
+npm run build
+```
+
+## API 文档
+
+### 图标相关接口
+
+- `GET /api/icons` - 获取图标列表
+- `GET /api/icons/:id` - 获取单个图标信息
+- `POST /api/icons` - 上传新图标
+- `DELETE /api/icons/:id` - 删除图标
+- `GET /api/icons/files/:filename` - 下载图标文件
+
+### 分类相关接口
+
+- `GET /api/categories` - 获取所有分类
+- `POST /api/categories` - 创建新分类
+- `DELETE /api/categories/:id` - 删除分类
+
+### 认证相关接口
+
+- `POST /api/auth/login` - 用户登录
+- `POST /api/auth/logout` - 用户登出
+- `GET /api/auth/status` - 获取登录状态
+
+## 配置说明
+
+### 后端配置
+
+主要配置文件为 `.env`，可设置以下环境变量：
+
+- `FLASK_APP` - Flask应用入口
+- `FLASK_ENV` - 运行环境 (development/production)
+- `FLASK_DEBUG` - 调试模式
+- `FLASK_HOST` - 主机地址
+- `FLASK_PORT` - 端口号
+- `SECRET_KEY` - 应用密钥
+- `SQLALCHEMY_DATABASE_URI` - 数据库连接URI
+- `ICON_STORAGE_PATH` - 图标存储路径
+- `MAX_CONTENT_LENGTH` - 最大上传文件大小
+- `AUTH_USERNAME` - 认证用户名
+- `AUTH_PASSWORD` - 认证密码
+
+### 前端配置
+
+前端配置主要在 `src/api/api.js` 中：
+
+- `API_BASE_URL` - 后端API基础URL
+- `ICON_BASE_URL` - 图标文件基础URL
+
+## 开发指南
+
+### 后端开发
+
+1. 创建新的API路由：在 `app/api/` 目录下创建新的路由模块
+2. 添加业务逻辑：在 `app/services/` 目录下实现业务功能
+3. 定义数据模型：在 `app/models/` 目录下创建模型类
+4. 添加工具函数：在 `app/utils/` 目录下添加辅助函数
+
+### 前端开发
+
+1. 创建组件：在 `src/components/` 目录下组织UI组件
+2. 添加样式：在 `src/styles/` 目录下编写CSS样式
+3. API调用：使用全局的 `api` 对象进行后端通信
+4. 状态管理：在 `main.js` 中使用 `appState` 对象管理应用状态
+
+## 安全注意事项
+
+1. 生产环境必须修改 `.env` 文件中的默认认证信息
+2. 生产环境建议使用 HTTPS 协议
+3. 考虑使用更安全的认证机制替代简单认证
+4. 合理设置文件上传大小限制，防止DoS攻击
+5. 对上传的文件进行严格的类型和内容验证
 
 ## 许可证
 
-本项目采用MIT许可证。
+本项目采用 MIT 许可证。详见 LICENSE 文件。
 
-## 支持的图标格式
+## 更新日志
 
-- PNG (.png)
-- JPG/JPEG (.jpg, .jpeg)
-- GIF (.gif)
-- SVG (.svg)
-- ICO (.ico)
-- WebP (.webp)
+### v0.1.5
+- 重构为前后端分离架构
+- 采用模块化设计，提升代码可维护性
+- 优化API设计，支持更多功能
+- 增加响应式前端界面
+- 提供一键启动脚本
 
-## 注意事项
-
-- 使用Docker运行时，图标文件和数据库会保存在宿主机的卷中，确保数据持久化
-- 请不要上传包含敏感信息的图标文件
-- 定期备份您的图标和数据库文件
-- 图标按分类存储在物理文件夹中，更改分类会触发文件移动
-
-## License
-
-MIT
+### v0.1.0
+- 项目初始版本
+- 基础图标管理功能

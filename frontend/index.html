@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图标库管理系统</title>
+    <link rel="stylesheet" href="./src/styles/main.css">
+</head>
+<body>
+    <header>
+        <h1>图标库管理系统</h1>
+        <nav>
+            <ul>
+                <li><a href="#" id="nav-all">所有图标</a></li>
+                <li><a href="#" id="nav-categories">分类管理</a></li>
+                <li><a href="#" id="nav-upload">上传图标</a></li>
+                <li><a href="#" id="nav-login" class="nav-login-btn">登录</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- 分类筛选区域 -->
+            <div class="category-filter" id="category-filter">
+                <select id="category-select">
+                    <option value="">全部分类</option>
+                    <!-- 分类选项将通过JavaScript动态添加 -->
+                </select>
+                <button id="refresh-btn">刷新</button>
+            </div>
+
+            <!-- 图标网格展示区域 -->
+            <div class="icons-grid" id="icons-grid">
+                <!-- 图标将通过JavaScript动态添加 -->
+                <div class="loading">加载中...</div>
+            </div>
+
+            <!-- 上传表单区域 (默认隐藏) -->
+            <div class="upload-form" id="upload-form-container" style="display: none;">
+                <h2>上传图标</h2>
+                <form id="upload-form">
+                    <div class="form-group">
+                        <label for="icon-file">选择图标文件：</label>
+                        <input type="file" id="icon-file" accept=".png,.jpg,.jpeg,.gif,.svg,.ico,.webp" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="icon-category">选择分类：</label>
+                        <select id="icon-category" required>
+                            <option value="">请选择分类</option>
+                            <!-- 分类选项将通过JavaScript动态添加 -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="icon-tags">标签 (用逗号分隔)：</label>
+                        <input type="text" id="icon-tags" placeholder="例如: 社交媒体, 分享, 链接">
+                    </div>
+                    <div class="form-group">
+                        <label for="icon-description">描述：</label>
+                        <textarea id="icon-description" rows="3" placeholder="添加图标描述"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">上传图标</button>
+                </form>
+            </div>
+
+            <!-- 分类管理区域 (默认隐藏) -->
+            <div class="category-management" id="category-management" style="display: none;">
+                <h2>分类管理</h2>
+                <div class="category-list" id="category-list">
+                    <!-- 分类列表将通过JavaScript动态添加 -->
+                </div>
+                <div class="add-category">
+                    <input type="text" id="new-category-name" placeholder="新分类名称">
+                    <button id="add-category-btn">添加分类</button>
+                </div>
+            </div>
+
+            <!-- 登录表单 (默认隐藏) -->
+            <div class="login-form" id="login-form" style="display: none;">
+                <h2>用户登录</h2>
+                <form id="login-form-element">
+                    <div class="form-group">
+                        <label for="username">用户名：</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码：</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" class="submit-btn">登录</button>
+                    <p class="error-message" id="login-error"></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 图标库管理系统 v0.1.5</p>
+    </footer>
+
+    <script src="./src/api/api.js"></script>
+    <script src="./src/main.js"></script>
+</body>
+</html>
