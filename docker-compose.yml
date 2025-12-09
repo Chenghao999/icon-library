@@ -9,7 +9,11 @@ services:
       - "5000:5000"
     volumes:
       - ./static/icons:/app/static/icons
+      - ./data:/app/data
     environment:
       - SECRET_KEY=icon_manager_secret_key_change_this_in_production
       - ICON_STORAGE_PATH=/app/static/icons
+      - DATABASE_URL=sqlite:////app/data/icons.db
       - FLASK_ENV=production
+      - GUNICORN_CMD_ARGS="--timeout 120 --workers 4"
+    user: "1000:1000"

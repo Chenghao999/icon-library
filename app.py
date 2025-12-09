@@ -1,10 +1,11 @@
 # 简化版本的图标管理器
 # 确保基本功能可用，减少依赖要求
-from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify
 import os
 import json
 from datetime import datetime
 import re
+from urllib.parse import quote
 
 # 尝试导入额外依赖，但即使失败也继续运行
 try:
@@ -60,14 +61,16 @@ class SimpleCategory:
         self.name = name
 
 class SimpleIcon:
-    def __init__(self, id, filename, original_filename, category_id=1, category_name='未分类'):
+    def __init__(self, id, filename, original_filename, category_id=1, category_name='未分类', **kwargs):
         self.id = id
         self.filename = filename
         self.original_filename = original_filename
         self.category_id = category_id
         self.category_name = category_name
-        self.upload_date = datetime.utcnow()
-        self.is_favorite = False
+        # 如果提供了upload_date参数，则使用它，否则创建新的
+        self.upload_date = kwargs.get('upload_date', datetime.utcnow())
+        # 如果提供了is_favorite参数，则使用它，否则默认为False
+        self.is_favorite = kwargs.get('is_favorite', False)
     
     @property
     def url(self):
@@ -78,8 +81,20 @@ class SimpleIcon:
 if sqlalchemy_available:
     try:
         # 配置SQLAlchemy
-        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///data/icons.db')
+        # 使用绝对路径来避免Docker容器中的权限问题
+        db_path = os.path.join(os.getcwd(), 'data', 'icons.db')
+        app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', f'sqlite:///{db_path}')
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        
+        # 确保数据库目录有写入权限
+        if not os.path.exists('data'):
+            os.makedirs('data')
+        
+        # 尝试设置数据目录权限（如果可能）
+        try:
+            os.chmod('data', 0o755)
+        except:
+            print("警告: 无法修改data目录权限，但将继续尝试初始化数据库")
         
         # 初始化数据库
         db = SQLAlchemy(app)
@@ -158,7 +173,18 @@ def get_file_icons():
         # 确保有category_name字段
         if 'category_name' not in icon_data:
             icon_data['category_name'] = categories_dict.get(icon_data.get('category_id'), '未分类')
-        icons.append(SimpleIcon(**icon_data))
+        
+        # 添加额外的安全检查，确保必要字段存在
+        required_fields = ['id', 'filename', 'original_filename']
+        missing_fields = [f for f in required_fields if f not in icon_data]
+        if missing_fields:
+            print(f"警告: 图标数据缺少必要字段 {missing_fields}, 跳过该图标")
+            continue
+            
+        try:
+            icons.append(SimpleIcon(**icon_data))
+        except Exception as e:
+            print(f"创建SimpleIcon对象失败: {e}, 图标数据: {icon_data}")
     
     return icons
 
@@ -298,8 +324,8 @@ def create_category_folder(category_name):
 
 def sanitize_path(path):
     """清理路径，防止路径遍历攻击"""
-    # 移除可能的路径遍历攻击字符
-    sanitized = re.sub(r'[\\/\:\*\?"\<\>\|]', '_', path)
+    # 移除可能的路径遍历攻击字符，但保留路径分隔符(/)
+    sanitized = re.sub(r'[\\\:\*\?"\<\>\|]', '_', path)
     return sanitized
 
 def get_categories():
@@ -350,7 +376,7 @@ def upload_icon():
         unique_filename = generate_secure_filename(file.filename)
         
         # 获取分类
-        category_id = request.form.get('category', '1')
+        category_id = request.form.get('category_id', '1')
         
         # 根据存储方式获取分类信息
         if sqlalchemy_available:
@@ -553,8 +579,9 @@ def copy_icon_url(icon_id):
         if not filename:
             return jsonify({'success': False, 'message': '图标不存在'})
         
-        # 构建图标URL
-        icon_url = f'{base_url}/icons/{category_name}/{filename}'
+        # 构建图标URL，对中文分类名称进行URL编码
+        encoded_category = quote(category_name)
+        icon_url = f'{base_url}/icons/{encoded_category}/{filename}'
         
         # 返回URL，让前端处理复制操作
         return jsonify({'success': True, 'url': icon_url})
@@ -619,6 +646,42 @@ def add_category():
         print(f"添加分类时出错: {e}")
         return jsonify({'success': False, 'message': f'分类创建失败: {str(e)}'})
 
+@app.route('/update-category', methods=['POST'])
+def update_category():
+    """更新分类信息"""
+    try:
+        category_id = request.form.get('category_id', type=int)
+        new_category_name = request.form.get('category_name')
+        
+        if not category_id or not new_category_name:
+            return jsonify({'success': False, 'message': '分类ID和名称不能为空'})
+            
+        # 不允许修改默认分类
+        if category_id == 1:
+            return jsonify({'success': False, 'message': '默认分类不能修改'})
+        
+        # 查找分类
+        category = SimpleCategory.query.get(category_id)
+        if not category:
+            return jsonify({'success': False, 'message': '分类不存在'})
+            
+        # 检查新名称是否与其他分类重复
+        existing_category = SimpleCategory.query.filter(
+            SimpleCategory.name == new_category_name,
+            SimpleCategory.id != category_id
+        ).first()
+        if existing_category:
+            return jsonify({'success': False, 'message': '分类名称已存在'})
+        
+        # 更新分类名称
+        category.name = new_category_name
+        db.session.commit()
+        
+        return jsonify({'success': True, 'id': category.id, 'name': category.name})
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'更新分类时出错: {e}')
+        return jsonify({'success': False, 'message': f'更新分类时出错: {str(e)}'})
 def update_file_icon_category(icon_id, new_category_name, new_category_id=None):
     """在文件系统存储模式下更新图标的分类"""
     icons = load_json_data(ICONS_DATA_FILE, [])
@@ -652,6 +715,140 @@ def update_file_icon_category(icon_id, new_category_name, new_category_id=None):
             save_json_data(ICONS_DATA_FILE, icons)
             return True
     return False
+
+def delete_file_category(category_id):
+    """从文件系统删除分类"""
+    categories = load_json_data(CATEGORIES_DATA_FILE, [])
+    
+    # 查找要删除的分类
+    category_to_delete = None
+    category_index = -1
+    
+    for i, cat in enumerate(categories):
+        if cat['id'] == category_id:
+            category_to_delete = cat
+            category_index = i
+            break
+    
+    if not category_to_delete:
+        return False
+    
+    # 不能删除默认分类
+    if category_id == 1:
+        return False
+    
+    # 获取分类名称
+    category_name = category_to_delete['name']
+    
+    # 获取该分类下的所有图标
+    icons = load_json_data(ICONS_DATA_FILE, [])
+    has_icons = False
+    
+    for icon in icons:
+        if icon.get('category_id') == category_id or icon.get('category_name') == category_name:
+            # 将图标移到默认分类
+            icon['category_id'] = 1
+            icon['category_name'] = '未分类'
+            has_icons = True
+    
+    # 保存更新后的图标数据
+    if has_icons:
+        save_json_data(ICONS_DATA_FILE, icons)
+    
+    # 从分类列表中删除
+    del categories[category_index]
+    save_json_data(CATEGORIES_DATA_FILE, categories)
+    
+    # 删除分类文件夹（如果存在）
+    category_path = os.path.join(app.config['ICON_STORAGE_PATH'], category_name)
+    if os.path.exists(category_path):
+        try:
+            # 检查文件夹是否为空
+            if not os.listdir(category_path):
+                os.rmdir(category_path)
+        except Exception as e:
+            print(f"删除分类文件夹失败: {e}")
+    
+    return True
+
+@app.route('/delete-category/<int:category_id>', methods=['POST'])
+def delete_category(category_id):
+    try:
+        # 不能删除默认分类
+        if category_id == 1:
+            return jsonify({'success': False, 'message': '默认分类不能删除'})
+        
+        # 定义一个变量保存分类名称
+        category_name = None
+        
+        # 根据存储方式执行删除操作
+        if sqlalchemy_available:
+            try:
+                # 查找分类
+                category = Category.query.get(category_id)
+                if not category:
+                    return jsonify({'success': False, 'message': '分类不存在'})
+                
+                category_name = category.name
+                
+                # 检查分类下是否有图标
+                if category.icons:
+                    # 获取默认分类
+                    default_category = Category.query.filter_by(name='未分类').first()
+                    if not default_category:
+                        default_category = Category(name='未分类')
+                        db.session.add(default_category)
+                    
+                    # 将所有图标移到默认分类
+                    for icon in category.icons:
+                        # 获取旧文件路径
+                        old_file_path = os.path.join(app.config['ICON_STORAGE_PATH'], category_name, icon.filename)
+                        new_file_path = os.path.join(app.config['ICON_STORAGE_PATH'], '未分类', icon.filename)
+                        
+                        # 移动文件
+                        if os.path.exists(old_file_path):
+                            # 检查新路径是否已存在文件，需要处理文件冲突
+                            if os.path.exists(new_file_path):
+                                base, ext = os.path.splitext(icon.filename)
+                                timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+                                new_filename = f"{base}_{timestamp}{ext}"
+                                new_file_path = os.path.join(app.config['ICON_STORAGE_PATH'], '未分类', new_filename)
+                                os.rename(old_file_path, new_file_path)
+                                icon.filename = new_filename
+                            else:
+                                os.rename(old_file_path, new_file_path)
+                        
+                        # 更新图标分类
+                        icon.category_id = default_category.id
+                
+                # 删除分类
+                db.session.delete(category)
+                db.session.commit()
+                
+                # 删除分类文件夹
+                if category_name:
+                    category_path = os.path.join(app.config['ICON_STORAGE_PATH'], category_name)
+                    if os.path.exists(category_path):
+                        try:
+                            os.rmdir(category_path)
+                        except Exception as e:
+                            print(f"删除分类文件夹失败: {e}")
+                            # 文件夹删除失败不影响分类删除
+            except Exception as e:
+                db.session.rollback()
+                print(f"从数据库删除分类失败: {e}")
+                # 尝试从文件系统删除
+                if not delete_file_category(category_id):
+                    return jsonify({'success': False, 'message': '删除分类失败'})
+        else:
+            # 使用文件系统存储
+            if not delete_file_category(category_id):
+                return jsonify({'success': False, 'message': '分类不存在或删除失败'})
+        
+        return jsonify({'success': True, 'message': '分类已成功删除'})
+    except Exception as e:
+        print(f"删除分类时出错: {e}")
+        return jsonify({'success': False, 'message': f'删除失败: {str(e)}'})
 
 @app.route('/update-category/<int:icon_id>', methods=['POST'])
 def update_icon_category(icon_id):

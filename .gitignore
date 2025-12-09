@@ -1,0 +1,58 @@
+# Windows 临时文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+~\$*
+*.tmp
+*.temp
+*.bak
+
+# macOS 临时文件和目录
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统目录
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker 相关
+*.dockerfile
+.dockerignore
+
+# 日志文件
+*.log
+
+# 构建输出
+build/
+dist/
+
+# 虚拟环境
+venv/
+env/
+
+# 其他临时文件
+.cache/
+*.cache
+*.pid
+*.seed
+*.pid.lock
