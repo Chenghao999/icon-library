@@ -56,3 +56,6 @@ env/
 *.pid
 *.seed
 *.pid.lock
+
+# 忽略图标文件目录（通常很大，不适合放入版本控制）
+static/icons/
