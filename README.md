@@ -1,4 +1,4 @@
-# 图标库管理系统
+# Icon Library Management System
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-v0.1.6-blue.svg">
@@ -7,86 +7,90 @@
   <img src="https://img.shields.io/badge/docker-ready-blue.svg">
 </p>
 
-## 项目介绍
+## Project Introduction
 
-图标库管理系统是一个基于前后端分离架构的Web应用，用于管理和分发各种图标资源。系统支持图标上传、分类管理、搜索下载等功能，适用于团队内部图标资源的统一管理。
+Icon Library Management System is a web application based on a separated front-end and back-end architecture, designed for managing and distributing various icon resources. The system supports icon uploading, category management, search and download functions, and is suitable for unified management of icon resources within teams.
 
-## 系统架构
+## Author Information
 
-### 前后端分离架构
+- **Development Background**: I developed this software using AI tools because I found it difficult to manage icons when using sun-panel ([https://github.com/hslr-s/sun-panel](https://github.com/hslr-s/sun-panel))
 
-该项目采用现代化的前后端分离架构：
+## System Architecture
 
-- **后端**: 使用 Python Flask 框架构建 RESTful API 服务
-- **前端**: 使用原生 JavaScript、HTML5 和 CSS3 构建单页应用
-- **数据存储**: 支持 SQLite、MySQL、PostgreSQL 等多种数据库
-- **文件存储**: 本地文件系统存储图标资源
+### Separated Front-end and Back-end Architecture
 
-### 目录结构
+The project adopts a modern separated front-end and back-end architecture:
+
+- **Back-end**: RESTful API service built with Python Flask framework
+- **Front-end**: Single-page application built with vanilla JavaScript, HTML5, and CSS3
+- **Data Storage**: Supports multiple databases like SQLite, MySQL, PostgreSQL
+- **File Storage**: Local file system for storing icon resources
+
+### Directory Structure
 
 ```
 icon_store/
-├── backend/               # 后端应用
-│   ├── app/               # 应用主模块
-│   │   ├── api/           # API路由层
-│   │   ├── models/        # 数据模型层
-│   │   ├── services/      # 业务逻辑层
-│   │   ├── utils/         # 工具函数
-│   │   ├── middlewares/   # 中间件
-│   │   ├── config.py      # 配置文件
-│   │   └── __init__.py    # 应用初始化
-│   ├── uploads/           # 上传文件存储目录
-│   ├── app.py             # 应用入口
-│   ├── init_db.py         # 数据库初始化脚本
-│   ├── requirements.txt   # Python依赖
-│   ├── .env               # 环境变量
-│   └── .env.example       # 环境变量示例
-├── frontend/              # 前端应用
-│   ├── public/            # 静态资源
-│   ├── src/               # 源码
-│   │   ├── api/           # API通信模块
-│   │   ├── components/    # 组件
-│   │   ├── styles/        # CSS样式
-│   │   ├── utils/         # 工具函数
-│   │   └── main.js        # 主脚本
-│   ├── index.html         # 入口HTML
-│   └── package.json       # NPM配置
-├── start.bat              # Windows启动脚本
-├── start.sh               # Linux/Mac启动脚本
-└── README.md              # 项目说明文档
+├── backend/               # Back-end application
+│   ├── app/               # Main application module
+│   │   ├── api/           # API routing layer
+│   │   ├── models/        # Data model layer
+│   │   ├── services/      # Business logic layer
+│   │   ├── utils/         # Utility functions
+│   │   ├── middlewares/   # Middlewares
+│   │   ├── config.py      # Configuration file
+│   │   └── __init__.py    # Application initialization
+│   ├── uploads/           # Upload file storage directory
+│   ├── app.py             # Application entry
+│   ├── init_db.py         # Database initialization script
+│   ├── requirements.txt   # Python dependencies
+│   ├── .env               # Environment variables
+│   └── .env.example       # Environment variables example
+├── frontend/              # Front-end application
+│   ├── public/            # Static resources
+│   ├── src/               # Source code
+│   │   ├── api/           # API communication module
+│   │   ├── components/    # Components
+│   │   ├── styles/        # CSS styles
+│   │   ├── utils/         # Utility functions
+│   │   └── main.js        # Main script
+│   ├── index.html         # Entry HTML
+│   └── package.json       # NPM configuration
+├── start.bat              # Windows startup script
+├── start.sh               # Linux/Mac startup script
+└── README.md              # Project documentation
 ```
 
-### 核心特性
+### Core Features
 
-1. **前后端完全分离**
-   - 后端提供 RESTful API 接口
-   - 前端通过 AJAX 调用接口获取数据
-   - 支持跨域资源共享 (CORS)
+1. **Complete Separation of Front-end and Back-end**
+   - Backend provides RESTful API interfaces
+   - Frontend fetches data through AJAX calls
+   - Supports Cross-Origin Resource Sharing (CORS)
 
-2. **模块化设计**
-   - 后端采用 MVC 架构模式
-   - 分层设计：API层、服务层、数据访问层
-   - 易于扩展和维护
+2. **Modular Design**
+   - Backend adopts MVC architectural pattern
+   - Layered design: API layer, service layer, data access layer
+   - Easy to extend and maintain
 
-3. **功能完整**
-   - 图标上传、预览、下载
-   - 分类管理
-   - 用户认证
-   - 响应式设计
+3. **Complete Functionality**
+   - Icon uploading, previewing, downloading
+   - Category management
+   - User authentication
+   - Responsive design
 
-## Docker部署
+## Docker Deployment
 
-### 环境要求
+### Environment Requirements
 
 - **Docker**: 18.09+
 - **Docker Compose**: 1.25+
 
-### 快速部署
+### Quick Deployment
 
-#### 使用Docker Compose
+#### Using Docker Compose
 
-1. 确保Docker和Docker Compose已安装
-2. 在项目根目录下执行：
+1. Ensure Docker and Docker Compose are installed
+2. Execute in the project root directory:
 
 ```bash
 # Windows
@@ -97,200 +101,200 @@ chmod +x start.sh
 ./start.sh
 ```
 
-或者直接使用Docker Compose命令：
+Or directly use Docker Compose command:
 
 ```bash
 docker-compose up -d
 ```
 
-3. 访问 http://localhost:5000
+3. Visit http://localhost:5000
 
-### Docker配置说明
+### Docker Configuration Description
 
-项目已优化Docker镜像构建，主要特性：
+The project has optimized Docker image building with the following main features:
 
-- **多阶段构建**：减小最终镜像体积
-- **国内镜像源支持**：解决网络连接问题
-- **Alpine基础镜像**：更轻量级的运行环境
-- **资源限制**：CPU和内存使用限制
-- **日志优化**：限制日志大小和数量
+- **Multi-stage Build**: Reduces the final image size
+- **Domestic Mirror Source Support**: Solves network connection issues
+- **Alpine Base Image**: Lighter runtime environment
+- **Resource Limitations**: CPU and memory usage restrictions
+- **Log Optimization**: Limits log size and quantity
 
-### 自定义配置
+### Custom Configuration
 
-可以通过修改以下文件自定义Docker配置：
+You can customize Docker configuration by modifying the following files:
 
-- `Dockerfile`：容器镜像构建配置
-- `docker-compose.yml`：容器编排配置
-- `.dockerignore`：指定构建时忽略的文件
+- `Dockerfile`: Container image build configuration
+- `docker-compose.yml`: Container orchestration configuration
+- `.dockerignore`: Specify files to ignore during build
 
-### 镜像优化
+### Image Optimization
 
-项目已实施以下Docker镜像优化措施：
+The project has implemented the following Docker image optimization measures:
 
-- 使用Alpine基础镜像，减小镜像体积约80%
-- 采用多阶段构建，分离构建和运行环境
-- 使用虚拟环境隔离Python依赖
-- 移除不必要的构建依赖
-- 整合RUN命令减少镜像层数
-- 使用轻量级的waitress服务器替代gunicorn
+- Using Alpine base image, reducing image size by approximately 80%
+- Adopting multi-stage build to separate build and runtime environments
+- Using virtual environments to isolate Python dependencies
+- Removing unnecessary build dependencies
+- Consolidating RUN commands to reduce image layers
+- Using lightweight waitress server instead of gunicorn
 
-详细的优化信息可参考 `DOCKER_OPTIMIZATION.md` 文件。
+Detailed optimization information can be found in the `DOCKER_OPTIMIZATION.md` file.
 
-## 快速开始
+## Quick Start
 
-### 环境要求
+### Environment Requirements
 
 - **Python**: 3.7+
 - **Node.js**: 12.x+
-- **浏览器**: Chrome, Firefox, Safari, Edge 等现代浏览器
+- **Browser**: Chrome, Firefox, Safari, Edge and other modern browsers
 
-### 一键启动
+### One-click Startup
 
-#### Windows系统
+#### Windows System
 
-1. 确保已安装 Docker 和 Python
-2. 双击运行 `start.bat` 脚本
-3. 浏览器访问 http://localhost:5000
+1. Ensure Docker and Python are installed
+2. Double-click to run the `start.bat` script
+3. Access http://localhost:5000 in the browser
 
-#### Linux/Mac系统
+#### Linux/Mac System
 
-1. 确保已安装 Docker 和 Python
-2. 设置脚本执行权限：`chmod +x start.sh`
-3. 运行脚本：`./start.sh`
-4. 浏览器访问 http://localhost:5000
+1. Ensure Docker and Python are installed
+2. Set script execution permissions: `chmod +x start.sh`
+3. Run the script: `./start.sh`
+4. Access http://localhost:5000 in the browser
 
-### 手动安装
+### Manual Installation
 
-#### 后端安装
+#### Backend Installation
 
 ```bash
 cd backend
 
-# 创建虚拟环境（可选）
+# Create virtual environment (optional)
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate  # Windows
 
-# 安装依赖
+# Install dependencies
 pip install -r requirements.txt
 
-# 配置环境变量
+# Configure environment variables
 cp .env.example .env
-# 编辑 .env 文件，设置数据库连接等参数
+# Edit .env file, set database connection and other parameters
 
-# 初始化数据库
+# Initialize database
 python init_db.py
 
-# 启动后端服务
+# Start backend service
 python app.py
 ```
 
-#### 前端安装
+#### Frontend Installation
 
 ```bash
 cd frontend
 
-# 安装依赖
+# Install dependencies
 npm install
 
-# 开发模式启动
+# Start development mode
 npm run dev
 
-# 或构建生产版本
+# Or build production version
 npm run build
 ```
 
-## API 文档
+## API Documentation
 
-### 图标相关接口
+### Icon-related Interfaces
 
-- `GET /api/icons` - 获取图标列表
-- `GET /api/icons/:id` - 获取单个图标信息
-- `POST /api/icons` - 上传新图标
-- `DELETE /api/icons/:id` - 删除图标
-- `GET /api/icons/files/:filename` - 下载图标文件
+- `GET /api/icons` - Get icon list
+- `GET /api/icons/:id` - Get single icon information
+- `POST /api/icons` - Upload new icon
+- `DELETE /api/icons/:id` - Delete icon
+- `GET /api/icons/files/:filename` - Download icon file
 
-### 分类相关接口
+### Category-related Interfaces
 
-- `GET /api/categories` - 获取所有分类
-- `POST /api/categories` - 创建新分类
-- `DELETE /api/categories/:id` - 删除分类
+- `GET /api/categories` - Get all categories
+- `POST /api/categories` - Create new category
+- `DELETE /api/categories/:id` - Delete category
 
-### 认证相关接口
+### Authentication-related Interfaces
 
-- `POST /api/auth/login` - 用户登录
-- `POST /api/auth/logout` - 用户登出
-- `GET /api/auth/status` - 获取登录状态
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+- `GET /api/auth/status` - Get login status
 
-## 配置说明
+## Configuration Instructions
 
-### 后端配置
+### Backend Configuration
 
-主要配置文件为 `.env`，可设置以下环境变量：
+The main configuration file is `.env`, which can set the following environment variables:
 
-- `FLASK_APP` - Flask应用入口
-- `FLASK_ENV` - 运行环境 (development/production)
-- `FLASK_DEBUG` - 调试模式
-- `FLASK_HOST` - 主机地址
-- `FLASK_PORT` - 端口号
-- `SECRET_KEY` - 应用密钥
-- `SQLALCHEMY_DATABASE_URI` - 数据库连接URI
-- `ICON_STORAGE_PATH` - 图标存储路径
-- `MAX_CONTENT_LENGTH` - 最大上传文件大小
-- `AUTH_USERNAME` - 认证用户名
-- `AUTH_PASSWORD` - 认证密码
+- `FLASK_APP` - Flask application entry
+- `FLASK_ENV` - Running environment (development/production)
+- `FLASK_DEBUG` - Debug mode
+- `FLASK_HOST` - Host address
+- `FLASK_PORT` - Port number
+- `SECRET_KEY` - Application secret key
+- `SQLALCHEMY_DATABASE_URI` - Database connection URI
+- `ICON_STORAGE_PATH` - Icon storage path
+- `MAX_CONTENT_LENGTH` - Maximum upload file size
+- `AUTH_USERNAME` - Authentication username
+- `AUTH_PASSWORD` - Authentication password
 
-### 前端配置
+### Frontend Configuration
 
-前端配置主要在 `src/api/api.js` 中：
+Frontend configuration is mainly in `src/api/api.js`:
 
-- `API_BASE_URL` - 后端API基础URL
-- `ICON_BASE_URL` - 图标文件基础URL
+- `API_BASE_URL` - Backend API base URL
+- `ICON_BASE_URL` - Icon file base URL
 
-## 开发指南
+## Development Guide
 
-### 后端开发
+### Backend Development
 
-1. 创建新的API路由：在 `app/api/` 目录下创建新的路由模块
-2. 添加业务逻辑：在 `app/services/` 目录下实现业务功能
-3. 定义数据模型：在 `app/models/` 目录下创建模型类
-4. 添加工具函数：在 `app/utils/` 目录下添加辅助函数
+1. Create new API routes: Create new routing modules in the `app/api/` directory
+2. Add business logic: Implement business functions in the `app/services/` directory
+3. Define data models: Create model classes in the `app/models/` directory
+4. Add utility functions: Add helper functions in the `app/utils/` directory
 
-### 前端开发
+### Frontend Development
 
-1. 创建组件：在 `src/components/` 目录下组织UI组件
-2. 添加样式：在 `src/styles/` 目录下编写CSS样式
-3. API调用：使用全局的 `api` 对象进行后端通信
-4. 状态管理：在 `main.js` 中使用 `appState` 对象管理应用状态
+1. Create components: Organize UI components in the `src/components/` directory
+2. Add styles: Write CSS styles in the `src/styles/` directory
+3. API calls: Use the global `api` object for backend communication
+4. State management: Use the `appState` object in `main.js` to manage application state
 
-## 安全注意事项
+## Security Considerations
 
-1. 生产环境必须修改 `.env` 文件中的默认认证信息
-2. 生产环境建议使用 HTTPS 协议
-3. 考虑使用更安全的认证机制替代简单认证
-4. 合理设置文件上传大小限制，防止DoS攻击
-5. 对上传的文件进行严格的类型和内容验证
+1. In production environments, default authentication information in the `.env` file must be changed
+2. HTTPS protocol is recommended for production environments
+3. Consider using more secure authentication mechanisms instead of simple authentication
+4. Reasonably set file upload size limits to prevent DoS attacks
+5. Strictly validate the type and content of uploaded files
 
-## 许可证
+## License
 
-本项目采用 MIT 许可证。详见 LICENSE 文件。
+This project is licensed under the MIT License. See the LICENSE file for details.
   
- ## 更新日志
+## Changelog
   
- ### v0.1.6
-- 优化Docker镜像配置，减小镜像体积
-- 添加多阶段构建和国内镜像源支持
-- 完善容器化部署方案
-- 增加资源限制和日志优化
-- 创建`.dockerignore`和`.gitignore`文件
+### v0.1.6
+- Optimized Docker image configuration, reduced image size
+- Added multi-stage build and domestic mirror source support
+- Improved containerized deployment solution
+- Added resource limitations and log optimization
+- Created `.dockerignore` and `.gitignore` files
 
 ### v0.1.5
-- 重构为前后端分离架构
-- 采用模块化设计，提升代码可维护性
-- 优化API设计，支持更多功能
-- 增加响应式前端界面
-- 提供一键启动脚本
+- Refactored to separated front-end and back-end architecture
+- Adopted modular design to improve code maintainability
+- Optimized API design to support more functions
+- Added responsive frontend interface
+- Provided one-click startup script
 
 ### v0.1.0
-- 项目初始版本
-- 基础图标管理功能
+- Initial project version
+- Basic icon management functionality

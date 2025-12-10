@@ -1,7 +1,7 @@
 {
   "name": "icon-store-frontend",
   "version": "0.1.5",
-  "description": "图标库管理系统前端",
+  "description": "Icon Library Management System Frontend",
   "main": "index.html",
   "scripts": {
     "dev": "http-server -p 3000 -c-1",

@@ -1,28 +1,29 @@
 version: '3.8'
 
 services:
-  icon-manager:
+  icon_store:
     build:
       context: .
-      # 构建优化
+      # Build optimization
       cache_from:
-        - icon-manager:latest
-    container_name: icon-manager
+        - icon_store:latest
+    container_name: icon_store
     restart: always
     ports:
       - "5000:5000"
     volumes:
-      - ./static/icons:/app/static/icons
-      - ./data:/app/data
+      - ./data:/app/data  # data directory will automatically contain static/icons, data and logs subdirectories
     environment:
       - SECRET_KEY=icon_manager_secret_key_change_this_in_production
-      - ICON_STORAGE_PATH=/app/static/icons
+      - ICON_STORAGE_PATH=/app/data/static/icons
       - DATABASE_URL=sqlite:////app/data/icons.db
       - FLASK_ENV=production
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=password123
+      - LOG_PATH=/app/data/logs
+      - SAVE_LOGS=true
     user: "1000:1000"
-    # 资源限制
+    # Resource limits
     deploy:
       resources:
         limits:
@@ -31,7 +32,7 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-    # 日志优化
+    # Log optimization
     logging:
       driver: json-file
       options:

@@ -1,14 +1,14 @@
-// API 通信模块
+// API Communication Module
 
-// 后端API基础URL
+// Backend API base URL
 const API_BASE_URL = '/api';
 const ICON_BASE_URL = '/api/icons';
 
 // 创建API对象
 const api = {
     /**
-     * 获取所有图标
-     * @param {string} categoryId - 可选的分类ID
+     * Get all icons
+     * @param {string} categoryId - Optional category ID
      * @returns {Promise}
      */
     async getIcons(categoryId = '') {
@@ -20,8 +20,8 @@ const api = {
     },
     
     /**
-     * 获取单个图标信息
-     * @param {string} iconId - 图标ID
+     * Get single icon information
+     * @param {string} iconId - Icon ID
      * @returns {Promise}
      */
     async getIcon(iconId) {
@@ -29,8 +29,8 @@ const api = {
     },
     
     /**
-     * 上传图标
-     * @param {FormData} formData - 包含图标文件和信息的FormData
+     * Upload icon
+     * @param {FormData} formData - FormData containing icon file and information
      * @returns {Promise}
      */
     async uploadIcon(formData) {
@@ -40,8 +40,8 @@ const api = {
     },
     
     /**
-     * 删除图标
-     * @param {string} iconId - 图标ID
+     * Delete icon
+     * @param {string} iconId - Icon ID
      * @returns {Promise}
      */
     async deleteIcon(iconId) {

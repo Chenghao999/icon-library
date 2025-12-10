@@ -40,7 +40,7 @@ def create_app(config_name='dev'):
     
     # Logging configuration
     SAVE_LOGS = os.getenv('SAVE_LOGS', 'false').lower() == 'true'
-    LOG_PATH = os.getenv('LOG_PATH', '/app/logs')
+LOG_PATH = os.getenv('LOG_PATH', '/app/data/logs')  # 使用/app/data/logs作为默认路径，与docker卷挂载结构一致
     
     if SAVE_LOGS:
         # Ensure log directory exists

@@ -43,6 +43,9 @@ Thumbs.db
 # Logs
 logs
 *.log
+logs/
+logs_*.log
+logs/*
 
 # Runtime data
 pids
@@ -85,6 +88,7 @@ out/
 temp/
 *.tmp
 *.temp
+appdata/
 
 # OS cache
 .cache/

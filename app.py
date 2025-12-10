@@ -2,7 +2,7 @@
 # 确保基本功能可用，减少依赖要求
 
 # 应用版本号
-APP_VERSION = "0.1.5"
+APP_VERSION = "0.1.6"
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, session, make_response, send_file
 import os
 import json
@@ -116,13 +116,13 @@ def auth_status():
         'username': session.get('username') if is_authenticated() else None
     })
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey123')
-app.config['ICON_STORAGE_PATH'] = os.getenv('ICON_STORAGE_PATH', 'static/icons')
+app.config['ICON_STORAGE_PATH'] = os.getenv('ICON_STORAGE_PATH', 'data/static/icons')  # 使用data/static/icons作为默认路径，与docker卷挂载结构一致
 app.config['SESSION_TYPE'] = 'filesystem'  # 使用文件系统存储会话
 app.config['SESSION_PERMANENT'] = True  # 会话持久化
 
 # Logging configuration
 SAVE_LOGS = os.getenv('SAVE_LOGS', 'false').lower() == 'true'
-LOG_PATH = os.getenv('LOG_PATH', 'logs')
+LOG_PATH = os.getenv('LOG_PATH', 'data/logs')  # 使用data/logs作为默认路径，与docker卷挂载结构一致
 
 if SAVE_LOGS:
     # Ensure log directory exists
