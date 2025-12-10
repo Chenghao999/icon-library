@@ -206,7 +206,7 @@ function renderIcons(icons) {
         // 创建图标预览
         const iconPreview = document.createElement('div');
         iconPreview.className = 'icon-preview';
-        iconPreview.innerHTML = `<img src="${api.getIconUrl(icon.filename)}" alt="${icon.filename}">`;
+        iconPreview.innerHTML = `<img src="${api.getIconUrl(icon.id)}" alt="${icon.filename}">`;
         
         // 创建图标信息
         const iconInfo = document.createElement('div');
@@ -224,7 +224,7 @@ function renderIcons(icons) {
         // 下载按钮
         const downloadBtn = document.createElement('a');
         downloadBtn.className = 'btn btn-download';
-        downloadBtn.href = api.getIconUrl(icon.filename);
+        downloadBtn.href = api.getIconUrl(icon.id);
         downloadBtn.download = icon.filename;
         downloadBtn.textContent = '下载';
         
