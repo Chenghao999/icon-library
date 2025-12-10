@@ -1,5 +1,6 @@
 # 应用初始化文件
 import os
+import logging
 from flask import Flask, jsonify
 from flask_cors import CORS
 
@@ -36,6 +37,37 @@ def create_app(config_name='dev'):
     # 使用默认配置
     app_config = default_config()
     app.config.from_object(app_config)
+    
+    # Logging configuration
+    SAVE_LOGS = os.getenv('SAVE_LOGS', 'false').lower() == 'true'
+    LOG_PATH = os.getenv('LOG_PATH', '/app/logs')
+    
+    if SAVE_LOGS:
+        # Ensure log directory exists
+        if not os.path.exists(LOG_PATH):
+            os.makedirs(LOG_PATH)
+        
+        # Configure file logging
+        log_file_path = os.path.join(LOG_PATH, 'application.log')
+        
+        # Set log level and format
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(log_file_path, encoding='utf-8'),  # Specify UTF-8 encoding
+                logging.StreamHandler()
+            ]
+        )
+        
+        app.logger.info(f'Backend application logs configured to save to: {log_file_path}')
+    else:
+        # Console logging only
+        logging.basicConfig(
+            level=logging.INFO,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[logging.StreamHandler()]
+        )
     
     # 初始化CORS支持，允许跨域请求
     CORS(app, resources={r"/api/*": {"origins": "*"}})

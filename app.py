@@ -6,6 +6,7 @@ APP_VERSION = "0.1.5"
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, session, make_response, send_file
 import os
 import json
+import logging
 from datetime import datetime
 import re
 from urllib.parse import quote
@@ -118,6 +119,37 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'supersecretkey123')
 app.config['ICON_STORAGE_PATH'] = os.getenv('ICON_STORAGE_PATH', 'static/icons')
 app.config['SESSION_TYPE'] = 'filesystem'  # 使用文件系统存储会话
 app.config['SESSION_PERMANENT'] = True  # 会话持久化
+
+# Logging configuration
+SAVE_LOGS = os.getenv('SAVE_LOGS', 'false').lower() == 'true'
+LOG_PATH = os.getenv('LOG_PATH', 'logs')
+
+if SAVE_LOGS:
+    # Ensure log directory exists
+    if not os.path.exists(LOG_PATH):
+        os.makedirs(LOG_PATH)
+    
+    # Configure file logging
+    log_file_path = os.path.join(LOG_PATH, 'application.log')
+    
+    # Set log level and format
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file_path, encoding='utf-8'),  # Specify UTF-8 encoding
+            logging.StreamHandler()
+        ]
+    )
+    
+    app.logger.info(f'Application logs configured to save to: {log_file_path}')
+else:
+    # Console logging only
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
+    )
 
 # 确保图标存储目录存在
 if not os.path.exists(app.config['ICON_STORAGE_PATH']):
