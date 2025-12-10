@@ -123,6 +123,16 @@ data/*.sqlite
 *.so
 *.dylib
 
+# Large archive files
+*.tar
+*.tar.gz
+*.zip
+*.7z
+*.rar
+*.iso
+*.img
+icon_store.tar
+
 # Flask specific
 instance/*
 !instance/.gitkeep
