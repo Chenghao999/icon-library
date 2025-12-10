@@ -77,17 +77,26 @@ function updateLoginUI() {
         loginBtn.classList.remove('nav-login-btn');
         loginBtn.classList.add('nav-logout-btn');
         
-        // 显示管理功能
+        // 显示管理功能和编辑按钮
         document.getElementById('nav-categories').style.display = 'block';
         document.getElementById('nav-upload').style.display = 'block';
+        
+        // 显示所有编辑相关按钮
+        const editButtons = document.querySelectorAll('.icon-actions .btn-delete, .btn-delete-category, #add-category-btn');
+        editButtons.forEach(btn => btn.style.display = 'inline-block');
     } else {
         loginBtn.textContent = '登录';
         loginBtn.classList.add('nav-login-btn');
         loginBtn.classList.remove('nav-logout-btn');
         
-        // 隐藏管理功能
-        document.getElementById('nav-categories').style.display = 'block'; // 保持分类功能可见
-        document.getElementById('nav-upload').style.display = 'block';    // 保持上传功能可见
+        // 隐藏所有编辑和上传功能
+        document.getElementById('nav-categories').style.display = 'none';
+        document.getElementById('nav-upload').style.display = 'none';
+        
+        // 如果当前视图是编辑相关视图，切换到默认视图
+        if (appState.currentView === 'upload' || appState.currentView === 'categories') {
+            showView('all');
+        }
     }
 }
 
@@ -192,6 +201,7 @@ function renderIcons(icons) {
     icons.forEach(icon => {
         const iconItem = document.createElement('div');
         iconItem.className = 'icon-item';
+        iconItem.dataset.iconId = icon.id;
         
         // 创建图标预览
         const iconPreview = document.createElement('div');
@@ -218,8 +228,49 @@ function renderIcons(icons) {
         downloadBtn.download = icon.filename;
         downloadBtn.textContent = '下载';
         
-        // 仅登录用户显示删除按钮
+        // 仅登录用户显示管理按钮
         if (appState.isLoggedIn) {
+            // 分类转移下拉菜单
+            const transferGroup = document.createElement('div');
+            transferGroup.className = 'transfer-group';
+            transferGroup.innerHTML = '<span>转移到:</span>';
+            
+            const categorySelect = document.createElement('select');
+            categorySelect.className = 'category-select';
+            categorySelect.dataset.iconId = icon.id;
+            categorySelect.dataset.currentCategory = icon.category_id || null;
+            
+            // 添加默认选项
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '选择分类';
+            categorySelect.appendChild(defaultOption);
+            
+            // 添加所有分类选项
+            appState.categories.forEach(category => {
+                // 跳过当前分类
+                if (category.id === icon.category_id) return;
+                
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+            
+            // 添加事件监听器
+            categorySelect.addEventListener('change', (e) => {
+                const newCategoryId = e.target.value;
+                if (newCategoryId) {
+                    transferIconCategory(icon.id, newCategoryId);
+                    // 重置选择框
+                    e.target.value = '';
+                }
+            });
+            
+            transferGroup.appendChild(categorySelect);
+            iconActions.appendChild(transferGroup);
+            
+            // 删除按钮
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn btn-delete';
             deleteBtn.textContent = '删除';
@@ -240,6 +291,55 @@ function renderIcons(icons) {
 function getCategoryName(categoryId) {
     const category = appState.categories.find(c => c.id === categoryId);
     return category ? category.name : '未分类';
+}
+
+// 删除图标
+async function deleteIcon(iconId) {
+    if (!appState.isLoggedIn) {
+        alert('请先登录');
+        return;
+    }
+    
+    if (!confirm('确定要删除这个图标吗？此操作不可恢复。')) {
+        return;
+    }
+    
+    try {
+        const response = await api.deleteIcon(iconId);
+        if (response.ok) {
+            // 删除成功，重新加载图标列表
+            loadIcons();
+        } else {
+            alert('删除图标失败: ' + (response.error || '未知错误'));
+        }
+    } catch (error) {
+        console.error('删除图标出错:', error);
+        alert('删除图标失败: ' + (error.message || '未知错误'));
+    }
+}
+
+// 转移图标到其他分类
+async function transferIconCategory(iconId, newCategoryId) {
+    if (!appState.isLoggedIn) {
+        alert('请先登录');
+        return;
+    }
+    
+    try {
+        const response = await api.updateIcon(iconId, {
+            category_id: newCategoryId
+        });
+        
+        if (response.ok) {
+            // 转移成功，重新加载图标列表
+            loadIcons();
+        } else {
+            alert('转移分类失败: ' + (response.error || '未知错误'));
+        }
+    } catch (error) {
+        console.error('转移分类出错:', error);
+        alert('转移分类失败: ' + (error.message || '未知错误'));
+    }
 }
 
 // 处理图标上传
@@ -287,21 +387,28 @@ function renderCategories() {
     const categoryList = document.getElementById('category-list');
     categoryList.innerHTML = '';
     
-    appState.categories.forEach(category => {
-        const categoryItem = document.createElement('div');
-        categoryItem.className = 'category-item';
-        categoryItem.innerHTML = `
-            <span>${category.name}</span>
-            ${appState.isLoggedIn ? `<button class="btn-delete-category" data-id="${category.id}">删除</button>` : ''}
-        `;
-        categoryList.appendChild(categoryItem);
-    });
-    
-    // 绑定删除分类事件
     if (appState.isLoggedIn) {
+        // 登录状态下显示完整的分类管理
+        appState.categories.forEach(category => {
+            const categoryItem = document.createElement('div');
+            categoryItem.className = 'category-item';
+            categoryItem.innerHTML = `
+                <span>${category.name}</span>
+                <button class="btn-delete-category" data-id="${category.id}">删除</button>
+            `;
+            categoryList.appendChild(categoryItem);
+        });
+        
+        // 绑定删除分类事件
         document.querySelectorAll('.btn-delete-category').forEach(btn => {
             btn.addEventListener('click', (e) => deleteCategory(e.target.dataset.id));
         });
+    } else {
+        // 未登录状态下显示提示信息
+        const loginPrompt = document.createElement('div');
+        loginPrompt.className = 'login-prompt';
+        loginPrompt.textContent = '请先登录以管理分类';
+        categoryList.appendChild(loginPrompt);
     }
 }
 
@@ -332,6 +439,11 @@ async function addCategory() {
 
 // 删除分类
 async function deleteCategory(categoryId) {
+    if (!appState.isLoggedIn) {
+        alert('请先登录');
+        return;
+    }
+    
     if (!confirm('确定要删除这个分类吗？该分类下的图标将被移至未分类。')) {
         return;
     }
@@ -356,23 +468,7 @@ async function deleteCategory(categoryId) {
     }
 }
 
-// 删除图标
-async function deleteIcon(iconId) {
-    if (!confirm('确定要删除这个图标吗？')) {
-        return;
-    }
-    
-    try {
-        const response = await api.deleteIcon(iconId);
-        if (response.ok) {
-            // 刷新图标列表
-            loadIcons();
-        }
-    } catch (error) {
-        console.error('删除图标失败:', error);
-        alert('删除图标失败: ' + (error.message || '未知错误'));
-    }
-}
+// 删除图标函数已在上方定义
 
 // 处理登录
 async function handleLogin(e) {

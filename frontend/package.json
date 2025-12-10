@@ -1,6 +1,6 @@
 {
   "name": "icon-store-frontend",
-  "version": "0.1.5",
+  "version": "0.1.10",
   "description": "Icon Library Management System Frontend",
   "main": "index.html",
   "scripts": {

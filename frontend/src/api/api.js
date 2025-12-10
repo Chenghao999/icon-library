@@ -29,6 +29,15 @@ const api = {
     },
     
     /**
+     * Delete an icon
+     * @param {string} iconId - Icon ID
+     * @returns {Promise}
+     */
+    async deleteIcon(iconId) {
+        return await this.request(`${API_BASE_URL}/icons/${iconId}`, 'DELETE');
+    },
+    
+    /**
      * Upload icon
      * @param {FormData} formData - FormData containing icon file and information
      * @returns {Promise}
@@ -109,7 +118,7 @@ const api = {
      * @returns {string}
      */
     getIconUrl(filename) {
-        return `${ICON_BASE_URL}/files/${filename}`;
+        return `/icons/${filename}`;
     },
     
     /**

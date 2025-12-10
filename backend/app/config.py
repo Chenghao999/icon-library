@@ -5,7 +5,7 @@ from datetime import timedelta
 class Config:
     """基础配置类"""
     # 应用版本号
-    APP_VERSION = "0.1.5"
+    APP_VERSION = "0.1.10"
     
     # 密钥配置
     SECRET_KEY = os.getenv('SECRET_KEY', 'supersecretkey123')

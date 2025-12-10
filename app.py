@@ -2,7 +2,7 @@
 # 确保基本功能可用，减少依赖要求
 
 # 应用版本号
-APP_VERSION = "0.1.6"
+APP_VERSION = "0.1.10"
 from flask import Flask, render_template, request, redirect, url_for, flash, send_from_directory, jsonify, session, make_response, send_file
 import os
 import json

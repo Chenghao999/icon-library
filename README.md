@@ -1,7 +1,7 @@
 # icon_library
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v0.1.6-blue.svg">
+  <img src="https://img.shields.io/badge/version-v0.1.10-blue.svg">
   <img src="https://img.shields.io/badge/license-MIT-green.svg">
   <img src="https://img.shields.io/badge/technology-Flask%20%2B%20Vanilla%20JS-blue.svg">
   <img src="https://img.shields.io/badge/docker-ready-blue.svg">
@@ -281,6 +281,12 @@ This project is licensed under the MIT License. See the LICENSE file for details
   
 ## Changelog
   
+### v0.1.9
+- 实现图标删除功能
+- 基于登录状态隐藏编辑区域按钮
+- 实现图片在不同分类间转移功能
+- 优化用户界面体验
+
 ### v0.1.6
 - Optimized Docker image configuration, reduced image size
 - Added multi-stage build and domestic mirror source support
