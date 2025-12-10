@@ -1,9 +1,10 @@
 # 图标库管理系统
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-v0.1.5-blue.svg">
+  <img src="https://img.shields.io/badge/version-v0.1.6-blue.svg">
   <img src="https://img.shields.io/badge/license-MIT-green.svg">
   <img src="https://img.shields.io/badge/technology-Flask%20%2B%20Vanilla%20JS-blue.svg">
+  <img src="https://img.shields.io/badge/docker-ready-blue.svg">
 </p>
 
 ## 项目介绍
@@ -73,6 +74,68 @@ icon_store/
    - 用户认证
    - 响应式设计
 
+## Docker部署
+
+### 环境要求
+
+- **Docker**: 18.09+
+- **Docker Compose**: 1.25+
+
+### 快速部署
+
+#### 使用Docker Compose
+
+1. 确保Docker和Docker Compose已安装
+2. 在项目根目录下执行：
+
+```bash
+# Windows
+start.bat
+
+# Linux/Mac
+chmod +x start.sh
+./start.sh
+```
+
+或者直接使用Docker Compose命令：
+
+```bash
+docker-compose up -d
+```
+
+3. 访问 http://localhost:5000
+
+### Docker配置说明
+
+项目已优化Docker镜像构建，主要特性：
+
+- **多阶段构建**：减小最终镜像体积
+- **国内镜像源支持**：解决网络连接问题
+- **Alpine基础镜像**：更轻量级的运行环境
+- **资源限制**：CPU和内存使用限制
+- **日志优化**：限制日志大小和数量
+
+### 自定义配置
+
+可以通过修改以下文件自定义Docker配置：
+
+- `Dockerfile`：容器镜像构建配置
+- `docker-compose.yml`：容器编排配置
+- `.dockerignore`：指定构建时忽略的文件
+
+### 镜像优化
+
+项目已实施以下Docker镜像优化措施：
+
+- 使用Alpine基础镜像，减小镜像体积约80%
+- 采用多阶段构建，分离构建和运行环境
+- 使用虚拟环境隔离Python依赖
+- 移除不必要的构建依赖
+- 整合RUN命令减少镜像层数
+- 使用轻量级的waitress服务器替代gunicorn
+
+详细的优化信息可参考 `DOCKER_OPTIMIZATION.md` 文件。
+
 ## 快速开始
 
 ### 环境要求
@@ -85,16 +148,16 @@ icon_store/
 
 #### Windows系统
 
-1. 确保已安装 Python 和 Node.js
+1. 确保已安装 Docker 和 Python
 2. 双击运行 `start.bat` 脚本
-3. 浏览器访问 http://localhost:3000
+3. 浏览器访问 http://localhost:5000
 
 #### Linux/Mac系统
 
-1. 确保已安装 Python 和 Node.js
+1. 确保已安装 Docker 和 Python
 2. 设置脚本执行权限：`chmod +x start.sh`
 3. 运行脚本：`./start.sh`
-4. 浏览器访问 http://localhost:3000
+4. 浏览器访问 http://localhost:5000
 
 ### 手动安装
 
@@ -211,8 +274,15 @@ npm run build
 ## 许可证
 
 本项目采用 MIT 许可证。详见 LICENSE 文件。
-
-## 更新日志
+  
+ ## 更新日志
+  
+ ### v0.1.6
+- 优化Docker镜像配置，减小镜像体积
+- 添加多阶段构建和国内镜像源支持
+- 完善容器化部署方案
+- 增加资源限制和日志优化
+- 创建`.dockerignore`和`.gitignore`文件
 
 ### v0.1.5
 - 重构为前后端分离架构

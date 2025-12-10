@@ -1,8 +1,12 @@
-version: '3'
+version: '3.8'
 
 services:
   icon-manager:
-    build: .
+    build:
+      context: .
+      # 构建优化
+      cache_from:
+        - icon-manager:latest
     container_name: icon-manager
     restart: always
     ports:
@@ -15,7 +19,21 @@ services:
       - ICON_STORAGE_PATH=/app/static/icons
       - DATABASE_URL=sqlite:////app/data/icons.db
       - FLASK_ENV=production
-      - GUNICORN_CMD_ARGS="--timeout 120 --workers 4"
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=password123
     user: "1000:1000"
+    # 资源限制
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    # 日志优化
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

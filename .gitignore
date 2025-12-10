@@ -1,61 +1,118 @@
-# Windows 临时文件
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-~\$*
-*.tmp
-*.temp
-*.bak
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# macOS 临时文件和目录
+# Docker
+.docker/
+Dockerfile.*
+.dockerignore
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# OS generated files
 .DS_Store
-.AppleDouble
-.LSOverride
+.DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
+ehthumbs.db
+Thumbs.db
 
-# 编辑器文件
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
 
-# 系统目录
-node_modules/
-__pycache__/
-*.py[cod]
-*$py.class
+# Logs
+logs
+*.log
 
-# 环境变量文件
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Build outputs
+dist/
+build/
+out/
+
+# Local configs
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 
-# Docker 相关
-*.dockerfile
-.dockerignore
+# Temporary files
+.tmp/
+temp/
+*.tmp
+*.temp
 
-# 日志文件
-*.log
-
-# 构建输出
-build/
-dist/
-
-# 虚拟环境
-venv/
-env/
-
-# 其他临时文件
+# OS cache
 .cache/
-*.cache
-*.pid
-*.seed
-*.pid.lock
 
-# 忽略图标文件目录（通常很大，不适合放入版本控制）
-static/icons/
+# Database
+*.db
+*.sqlite
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.~*
+
+# Generated docs
+/docs/generated
+
+# Image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+
+# Binary files
+*.bin
+*.exe
+*.dll
+*.so
+*.dylib
