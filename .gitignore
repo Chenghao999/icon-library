@@ -92,6 +92,8 @@ temp/
 # Database
 *.db
 *.sqlite
+data/*.db
+data/*.sqlite
 
 # Backup files
 *.bak
@@ -116,3 +118,9 @@ temp/
 *.dll
 *.so
 *.dylib
+
+# Flask specific
+instance/*
+!instance/.gitkeep
+migrations/
+.flaskenv
