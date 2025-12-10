@@ -1,4 +1,4 @@
-# Icon Library Management System
+# icon_library
 
 <p align="center">
   <img src="https://img.shields.io/badge/version-v0.1.6-blue.svg">
@@ -9,7 +9,7 @@
 
 ## Project Introduction
 
-Icon Library Management System is a web application based on a separated front-end and back-end architecture, designed for managing and distributing various icon resources. The system supports icon uploading, category management, search and download functions, and is suitable for unified management of icon resources within teams.
+icon_library is a web application based on a separated front-end and back-end architecture, designed for managing and distributing various icon resources. The system supports icon uploading, category management, search and download functions, and is suitable for unified management of icon resources within teams.
 
 ## Author Information
 
@@ -29,7 +29,7 @@ The project adopts a modern separated front-end and back-end architecture:
 ### Directory Structure
 
 ```
-icon_store/
+icon_library/
 ├── backend/               # Back-end application
 │   ├── app/               # Main application module
 │   │   ├── api/           # API routing layer
