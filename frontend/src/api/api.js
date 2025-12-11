@@ -29,15 +29,6 @@ const api = {
     },
     
     /**
-     * Delete an icon
-     * @param {string} iconId - Icon ID
-     * @returns {Promise}
-     */
-    async deleteIcon(iconId) {
-        return await this.request(`${API_BASE_URL}/icons/${iconId}`, 'DELETE');
-    },
-    
-    /**
      * Upload icon
      * @param {FormData} formData - FormData containing icon file and information
      * @returns {Promise}
@@ -55,6 +46,16 @@ const api = {
      */
     async deleteIcon(iconId) {
         return await this.request(`${API_BASE_URL}/icons/${iconId}`, 'DELETE');
+    },
+
+    /**
+     * Update an icon
+     * @param {string} iconId - Icon ID
+     * @param {Object} payload - Fields to update
+     * @returns {Promise}
+     */
+    async updateIcon(iconId, payload) {
+        return await this.request(`${API_BASE_URL}/icons/${iconId}`, 'PUT', payload);
     },
     
     /**
@@ -117,8 +118,8 @@ const api = {
      * @param {string} filename - 图标文件名
      * @returns {string}
      */
-    getIconUrl(filename) {
-        return `/icons/${filename}`;
+    getIconUrl(iconId) {
+        return `${ICON_BASE_URL}/${iconId}/file`;
     },
     
     /**

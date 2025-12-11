@@ -206,7 +206,13 @@ function renderIcons(icons) {
         // 创建图标预览
         const iconPreview = document.createElement('div');
         iconPreview.className = 'icon-preview';
-        iconPreview.innerHTML = `<img src="${api.getIconUrl(icon.id)}" alt="${icon.filename}">`;
+        const iconUrl = api.getIconUrl(icon.id);
+
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H1',location:'frontend/src/main.js:renderIcons',message:'render icon url',data:{iconId:icon.id,filename:icon.filename,computedUrl:iconUrl,origin:window.location.origin},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+
+        iconPreview.innerHTML = `<img src="${iconUrl}" alt="${icon.filename}">`;
         
         // 创建图标信息
         const iconInfo = document.createElement('div');
@@ -224,9 +230,14 @@ function renderIcons(icons) {
         // 下载按钮
         const downloadBtn = document.createElement('a');
         downloadBtn.className = 'btn btn-download';
-        downloadBtn.href = api.getIconUrl(icon.id);
+        downloadBtn.href = iconUrl;
         downloadBtn.download = icon.filename;
         downloadBtn.textContent = '下载';
+        downloadBtn.addEventListener('click', () => {
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H3',location:'frontend/src/main.js:downloadClick',message:'download clicked',data:{iconId:icon.id,href:iconUrl,origin:window.location.origin},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
+        });
         
         // 仅登录用户显示管理按钮
         if (appState.isLoggedIn) {
@@ -305,16 +316,26 @@ async function deleteIcon(iconId) {
     }
     
     try {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'frontend/src/main.js:deleteIcon',message:'delete start',data:{iconId},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+
         const response = await api.deleteIcon(iconId);
         if (response.ok) {
             // 删除成功，重新加载图标列表
             loadIcons();
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'frontend/src/main.js:deleteIcon',message:'delete ok',data:{iconId},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
         } else {
             alert('删除图标失败: ' + (response.error || '未知错误'));
         }
     } catch (error) {
         console.error('删除图标出错:', error);
         alert('删除图标失败: ' + (error.message || '未知错误'));
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H4',location:'frontend/src/main.js:deleteIcon',message:'delete error',data:{iconId,error:error?.message},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
     }
 }
 
@@ -326,6 +347,10 @@ async function transferIconCategory(iconId, newCategoryId) {
     }
     
     try {
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H2',location:'frontend/src/main.js:transferIconCategory',message:'transfer start',data:{iconId,newCategoryId},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
+
         const response = await api.updateIcon(iconId, {
             category_id: newCategoryId
         });
@@ -333,12 +358,18 @@ async function transferIconCategory(iconId, newCategoryId) {
         if (response.ok) {
             // 转移成功，重新加载图标列表
             loadIcons();
+            // #region agent log
+            fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H2',location:'frontend/src/main.js:transferIconCategory',message:'transfer ok',data:{iconId,newCategoryId},timestamp:Date.now()})}).catch(()=>{});
+            // #endregion
         } else {
             alert('转移分类失败: ' + (response.error || '未知错误'));
         }
     } catch (error) {
         console.error('转移分类出错:', error);
         alert('转移分类失败: ' + (error.message || '未知错误'));
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/2bd302be-89d3-4f8c-b4a7-d31a5cb8ba79',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sessionId:'debug-session',runId:'pre-fix',hypothesisId:'H2',location:'frontend/src/main.js:transferIconCategory',message:'transfer error',data:{iconId,newCategoryId,error:error?.message},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
     }
 }
 
